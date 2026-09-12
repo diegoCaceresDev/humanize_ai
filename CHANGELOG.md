@@ -2,6 +2,22 @@
 
 All notable changes to Humanize AI are documented here.
 
+## [0.2.0] - 2026-09-12
+
+### Added
+
+- Browser-native UX Flight Recorder evidence for visible CTA candidates, first-viewport CTA count, missing image alt text, and unlabeled form fields.
+- Element-level CTA inspection in the active tab.
+- A reviewer-approved Focus Preview that emphasizes the measured primary action and temporarily softens competing actions.
+- Before/preview primary-action prominence comparison and an explicit zero-site-mutations indicator.
+- A bounded browser-evidence API contract that excludes extension-only element locators.
+
+### Safety
+
+- Preview state is limited to Humanize-owned CSS and `data-humanize-*` attributes.
+- Revert, result reset, and page refresh remove preview state; no site content, behavior, or persisted styles are changed.
+- Browser metrics are labeled as structural/visual proxies and never as proof of conversion, usability, or accessibility compliance.
+
 ## [0.1.0] - 2026-09-12
 
 ### Added

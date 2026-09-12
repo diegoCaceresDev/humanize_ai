@@ -1,6 +1,6 @@
 # Team setup and local test guide
 
-This guide takes a teammate from a fresh clone to a complete local Humanize workflow. It is written for release `v0.1.0`.
+This guide takes a teammate from a fresh clone to a complete local Humanize workflow. It is written for release `v0.2.0`.
 
 ## Prerequisites
 
@@ -17,7 +17,7 @@ Do not send `.env` files in chat or commit them. Request access through the team
 ```bash
 git clone https://github.com/diegoCaceresDev/humanize_ai.git
 cd humanize_ai
-git checkout v0.1.0
+git checkout v0.2.0
 npm ci
 python3 -m venv .venv
 source .venv/bin/activate
@@ -67,7 +67,7 @@ npm run package:extension
 The package command creates:
 
 - `apps/extension/.output/chrome-mv3/` — choose this directory in Chrome’s **Load unpacked** flow.
-- `apps/extension/.output/extension-0.1.0-chrome.zip` — the versioned release artifact for archive or distribution.
+- `apps/extension/.output/extension-0.2.0-chrome.zip` — the versioned release artifact for archive or distribution.
 
 ## 4. Run the local services
 
@@ -101,7 +101,8 @@ Expected live responses are `{"status":"ok"}` and `{"status":"ready","database":
 4. Pin **Humanize AI**.
 5. Visit `http://localhost:4173`.
 6. Open the Humanize AI toolbar popup and select **Humanize this page**.
-7. Wait for the report: it should show a score, summary, evidence-backed findings, and quick wins. Live runs may also show Exa sources.
+7. Wait for the report: it should show a score, summary, evidence-backed findings, quick wins, and browser-measured evidence. Live runs may also show Exa sources.
+8. Use **Inspect on page**, then **Apply focus preview**. Confirm **Revert preview** restores the untouched page state.
 
 For live runs, copy the returned audit `id` and confirm persistence:
 

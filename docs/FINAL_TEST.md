@@ -1,6 +1,6 @@
 # Final user test
 
-Humanize `v0.1.0` is ready for a full local Chrome workflow using Neon, OpenRouter, and optional Exa credentials. For a fresh clone, complete [team setup](TEAM_SETUP.md) first.
+Humanize `v0.2.0` is ready for a full local Chrome workflow using Neon, OpenRouter, and optional Exa credentials. For a fresh clone, complete [team setup](TEAM_SETUP.md) first.
 
 ## 1. Start the API
 
@@ -53,7 +53,7 @@ In Chrome:
 4. Choose `apps/extension/.output/chrome-mv3`.
 5. Pin **Humanize AI** to the toolbar if Chrome does not show it immediately.
 
-The generated ZIP at `apps/extension/.output/extension-0.1.0-chrome.zip` is useful for sharing the build, but **Load unpacked** is the developer-install path for this MVP.
+The generated ZIP at `apps/extension/.output/extension-0.2.0-chrome.zip` is useful for sharing the build, but **Load unpacked** is the developer-install path for this MVP.
 
 ## 4. Run the audit
 
@@ -62,9 +62,19 @@ The generated ZIP at `apps/extension/.output/extension-0.1.0-chrome.zip` is usef
 3. Click **Humanize this page** once.
 4. Wait for the report to render.
 
-The report should include a Humanity Score, a summary, evidence-backed findings, quick wins, and Exa research links when available.
+The report should include a Humanity Score, a summary, evidence-backed findings, quick wins, browser-measured evidence, and Exa research links when available.
 
-## 5. Verify persistence
+## 5. Verify Focus Preview
+
+1. In the rendered report, find **Focus Preview**.
+2. Select **Inspect on page** and confirm that Humanize highlights the observed CTA elements in the active tab.
+3. Select **Apply focus preview** and confirm the primary CTA gains emphasis while competing actions are softened.
+4. Confirm the panel shows a before/preview prominence comparison and `Site mutations: 0`.
+5. Select **Revert preview** and confirm the page returns to its original appearance. A browser refresh must also clear the preview.
+
+Focus Preview is a temporary visual/structural test. It must not claim that conversion, usability, or compliance changed.
+
+## 6. Verify persistence
 
 Every successful audit returns an `id`. Confirm that it was persisted:
 

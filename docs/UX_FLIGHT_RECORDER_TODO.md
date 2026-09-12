@@ -4,38 +4,38 @@ This list follows the selected **Focus Preview** scope in [UX Flight Recorder Pl
 
 ## P0 — Demo-critical core workflow
 
-- [ ] Create a shared `pageEvidence` module in the extension.
-  - [ ] Collect CTA candidates with text, semantic type, bounding box, and viewport visibility.
-  - [ ] Identify the top-viewport/hero region without depending on page-specific selectors.
-  - [ ] Collect heading bounds and ordered heading structure.
-  - [ ] Count visible images with empty alt text.
-  - [ ] Detect visible form fields without labels or accessible names.
-  - [ ] Normalize all text, cap collections, and omit form values.
-- [ ] Define `PageMetrics` and `ElementEvidence` TypeScript types.
-  - [ ] Document which signals are deterministic measurements and which are heuristics.
-  - [ ] Add a session-only generated ID to every evidence element.
-  - [ ] Do not persist raw selectors or sensitive form content.
-- [ ] Add matching bounded Pydantic schemas to the API request contract.
-  - [ ] Reject unbounded element lists and invalid bounds.
-  - [ ] Keep the existing page-capture contract backward compatible during migration.
+- [x] Create a shared `pageEvidence` module in the extension.
+  - [x] Collect CTA candidates with text, semantic type, bounding box, and viewport visibility.
+  - [x] Identify the top-viewport/hero region without depending on page-specific selectors.
+  - [ ] Collect heading bounds in addition to the existing ordered heading structure.
+  - [x] Count visible images with empty alt text.
+  - [x] Detect visible form fields without labels or accessible names.
+  - [x] Normalize all text, cap collections, and omit form values.
+- [x] Define `PageMetrics` and `ElementEvidence` TypeScript types.
+  - [x] Document which signals are deterministic measurements and which are heuristics.
+  - [x] Add a session-only generated ID to every evidence element.
+  - [x] Do not persist raw selectors or sensitive form content.
+- [x] Add matching bounded Pydantic schemas to the API request contract.
+  - [x] Reject unbounded element lists and invalid bounds.
+  - [x] Keep the existing page-capture contract backward compatible during migration.
 - [ ] Update the audit prompt and `AuditResult` schema.
   - [ ] Require citations to supplied evidence for every finding.
   - [ ] Add optional `preview_suggestion` with a primary element ID and competing element IDs.
   - [ ] Reject suggestions whose IDs are absent from the input evidence.
-- [ ] Build the evidence-inspection interaction in the popup.
-  - [ ] “Inspect on page” highlights only referenced elements.
-  - [ ] “Clear highlights” removes only Humanize annotations.
-  - [ ] Show the exact labels and count of highlighted elements.
-- [ ] Build Focus Preview in the active tab.
-  - [ ] Require an explicit click before injecting any styles.
-  - [ ] Use a namespaced `<style>` element and `data-humanize-*` attributes only.
-  - [ ] Highlight the suggested primary CTA and soften, but do not hide or disable, competing CTAs.
-  - [ ] Include a visible “Preview only” annotation.
-  - [ ] Revert by removing Humanize-owned style and attributes only.
-- [ ] Implement before/preview measurement comparison.
-  - [ ] Recalculate from the same collector used for the original audit.
-  - [ ] Show CTA count, primary-action prominence proxy, and preview-state status.
-  - [ ] Label the comparison as visual/structural, not a conversion result.
+- [x] Build the evidence-inspection interaction in the popup.
+  - [x] “Inspect on page” highlights only referenced elements.
+  - [x] “Clear highlights” removes only Humanize annotations.
+  - [ ] Show the exact labels and count of highlighted elements in the inspect state.
+- [x] Build Focus Preview in the active tab.
+  - [x] Require an explicit click before injecting any styles.
+  - [x] Use a namespaced `<style>` element and `data-humanize-*` attributes only.
+  - [x] Highlight the suggested primary CTA and soften, but do not hide or disable, competing CTAs.
+  - [ ] Add an in-page “Preview only” annotation in addition to the popup status.
+  - [x] Revert by removing Humanize-owned style and attributes only.
+- [x] Implement before/preview measurement comparison.
+  - [x] Recalculate from the same collector used for the original audit.
+  - [x] Show CTA count, primary-action prominence proxy, and preview-state status.
+  - [x] Label the comparison as visual/structural, not a conversion result.
 - [ ] Add tests.
   - [ ] Unit-test CTA classification and metric calculations.
   - [ ] Unit-test API validation for evidence and preview suggestions.

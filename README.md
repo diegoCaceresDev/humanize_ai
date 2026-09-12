@@ -17,8 +17,9 @@ Humanize is **not** an AI-authorship detector. It reviews the human quality of a
 - Neon Postgres persistence with Alembic migrations.
 - Local demo site, GitHub Actions workflow, and Render deployment blueprint.
 - Signal Violet interface with a Humanity Score, findings, evidence, recommendations, and quick wins.
+- Browser-native UX Flight Recorder: measured CTA/accessibility signals, element inspection, and a user-approved Focus Preview with a clean revert path.
 
-> **Current MVP boundary:** Humanize is a review-and-report tool. It does not yet alter the audited page, offer a CSS preview/revert flow, or export a PDF. Do not promise those features in the demo or submission until they are implemented.
+> **Current MVP boundary:** Humanize can apply a temporary Focus Preview that only adds Humanize-owned styling to the current tab. It never changes site content, behavior, or persisted styles; the user can revert it and a page refresh clears it. PDF export and persistent multi-audit comparisons are not included.
 
 ## Architecture
 
@@ -110,6 +111,7 @@ The source tree includes tests and CI configuration. A local passing run and a C
 - The screenshot and bounded page evidence leave the browser for the configured API; do not audit private, confidential, or sensitive pages during the demo.
 - Captured content is untrusted evidence, never instructions for the agent.
 - The report is advisory: the reviewer decides what to change.
+- Focus Preview is an observable visual/structural comparison, not proof of conversion, usability, or accessibility compliance.
 
 ## Project structure
 
@@ -135,6 +137,7 @@ render.yaml   # Render deployment blueprint
 - [Implementation plan](docs/IMPLEMENTATION_PLAN.md)
 - [Team ownership and acceptance criteria](docs/TEAM_PLAN.md)
 - [Humanize design system](docs/HUMANIZE_DESIGN_SYSTEM.md)
-- [Release notes](docs/RELEASE_NOTES_v0.1.0.md)
+- [UX Flight Recorder plan](docs/UX_FLIGHT_RECORDER_PLAN.md)
+- [Release notes](docs/RELEASE_NOTES_v0.2.0.md)
 - [Cloud test deployment](docs/CLOUD_TEST_DEPLOYMENT.md)
 - [Changelog](CHANGELOG.md)
