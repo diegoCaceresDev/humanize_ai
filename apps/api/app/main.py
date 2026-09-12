@@ -26,8 +26,16 @@ async def lifespan(_: FastAPI):
         await engine.dispose()
 
 
-app = FastAPI(title="Humanize API", version="0.1.0", lifespan=lifespan)
-app.add_middleware(CORSMiddleware, allow_origins=settings.origins, allow_origin_regex=r"chrome-extension://.*", allow_credentials=False, allow_methods=["GET", "POST"], allow_headers=["*"])
+app = FastAPI(title="Humanize API", version="0.1.1", lifespan=lifespan)
+cors_options: dict[str, object] = {
+    "allow_origins": settings.origins,
+    "allow_credentials": False,
+    "allow_methods": ["GET", "POST"],
+    "allow_headers": ["*"],
+}
+if settings.chrome_extension_origin_regex:
+    cors_options["allow_origin_regex"] = settings.chrome_extension_origin_regex
+app.add_middleware(CORSMiddleware, **cors_options)
 
 
 @app.middleware("http")

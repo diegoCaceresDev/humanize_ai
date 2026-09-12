@@ -94,6 +94,7 @@ Set `VITE_API_BASE_URL` to the deployed Render URL before packaging a production
 - [Team setup and test guide](docs/TEAM_SETUP.md)
 - [Final user workflow](docs/FINAL_TEST.md)
 - [Release notes for v0.1.0](docs/RELEASE_NOTES_v0.1.0.md)
+- [Cloud test deployment guide](docs/CLOUD_TEST_DEPLOYMENT.md)
 - [Changelog](CHANGELOG.md)
 - [Implementation plan](docs/IMPLEMENTATION_PLAN.md)
 - [Team ownership and acceptance criteria](docs/TEAM_PLAN.md)

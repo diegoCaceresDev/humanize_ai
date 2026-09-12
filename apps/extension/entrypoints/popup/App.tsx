@@ -32,6 +32,14 @@ type PageContext = {
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || "http://localhost:8000";
 
+function readableError(caught: unknown): string {
+  const message = caught instanceof Error ? caught.message : "Something went wrong.";
+  if (/failed to fetch/i.test(message)) {
+    return `Can’t reach the Humanize API at ${API_BASE_URL}. Check that the service is live and rebuild the extension with the correct VITE_API_BASE_URL.`;
+  }
+  return message;
+}
+
 function collectPageContext(): PageContext {
   const visible = (element: Element) => {
     const style = window.getComputedStyle(element);
@@ -130,7 +138,7 @@ export default function App() {
       if (!response.ok) throw new Error(payload.detail || "The audit service could not review this page.");
       setResult(payload);
     } catch (caught) {
-      setError(caught instanceof Error ? caught.message : "Something went wrong.");
+      setError(readableError(caught));
     } finally { setLoading(false); }
   }
 

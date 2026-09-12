@@ -16,6 +16,7 @@ class Settings(BaseSettings):
     exa_api_key: str = Field(default="", validation_alias=AliasChoices("EXA_API_KEY", "EXA_AI"))
     exa_enabled: bool = False
     allowed_origins: str = "http://localhost:3000"
+    allow_any_chrome_extension_origin: bool = True
     max_request_bytes: int = 12_000_000
 
     model_config = SettingsConfigDict(
@@ -28,6 +29,10 @@ class Settings(BaseSettings):
     @property
     def origins(self) -> list[str]:
         return [origin.strip() for origin in self.allowed_origins.split(",") if origin.strip()]
+
+    @property
+    def chrome_extension_origin_regex(self) -> str | None:
+        return r"chrome-extension://.*" if self.allow_any_chrome_extension_origin else None
 
     @property
     def async_database_url(self) -> str:

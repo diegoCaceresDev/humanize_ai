@@ -7,6 +7,10 @@ services:
     startCommand: alembic upgrade head && uvicorn app.main:app --host 0.0.0.0 --port $PORT
     healthCheckPath: /readyz
     envVars:
+      - key: APP_ENV
+        value: production
+      - key: DEMO_MODE
+        value: "false"
       - key: DATABASE_URL
         sync: false
       - key: DATABASE_URL_UNPOOLED
@@ -20,4 +24,6 @@ services:
       - key: EXA_ENABLED
         value: "true"
       - key: ALLOWED_ORIGINS
-        value: "http://localhost:3000"
+        sync: false
+      - key: ALLOW_ANY_CHROME_EXTENSION_ORIGIN
+        value: "false"

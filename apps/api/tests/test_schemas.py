@@ -49,6 +49,12 @@ def test_settings_normalize_neon_ssl_parameters(monkeypatch: pytest.MonkeyPatch)
     assert settings.async_database_url == "postgresql+asyncpg://neon.example/db?ssl=require"
 
 
+def test_settings_can_disable_broad_chrome_extension_cors() -> None:
+    settings = Settings(allowed_origins="chrome-extension://abcdefghijklmnop", allow_any_chrome_extension_origin=False, _env_file=None)
+    assert settings.origins == ["chrome-extension://abcdefghijklmnop"]
+    assert settings.chrome_extension_origin_regex is None
+
+
 def test_history_endpoint_explains_missing_database(monkeypatch: pytest.MonkeyPatch) -> None:
     monkeypatch.setattr(main, "engine", None)
     monkeypatch.setattr(main, "session_factory", None)
