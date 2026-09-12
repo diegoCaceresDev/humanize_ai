@@ -1,0 +1,14 @@
+node_modules/
+dist/
+.wxt/
+.output/
+__pycache__/
+.pytest_cache/
+.venv/
+*.py[cod]
+.env
+.env.*
+!.env.example
+coverage/
+.DS_Store
+

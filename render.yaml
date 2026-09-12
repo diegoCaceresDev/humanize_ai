@@ -1,0 +1,22 @@
+services:
+  - type: web
+    name: humanize-api
+    runtime: python
+    rootDir: apps/api
+    buildCommand: pip install -r requirements.txt
+    startCommand: uvicorn app.main:app --host 0.0.0.0 --port $PORT
+    healthCheckPath: /healthz
+    envVars:
+      - key: DATABASE_URL
+        sync: false
+      - key: OPENROUTER_API_KEY
+        sync: false
+      - key: OPENROUTER_MODEL
+        value: google/gemini-2.5-flash
+      - key: EXA_API_KEY
+        sync: false
+      - key: EXA_ENABLED
+        value: "true"
+      - key: ALLOWED_ORIGINS
+        value: "http://localhost:3000"
+

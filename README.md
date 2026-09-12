@@ -23,21 +23,50 @@ The browser context is essential: the agent reviews the actual page state rather
 
 ## Architecture
 
-Active Chrome tab -> content script and service worker -> Humanize side panel -> local Next.js endpoint -> OpenAI Responses API.
+Active Chrome tab -> one-button popup -> programmatic capture with the `activeTab` permission -> FastAPI -> optional Exa context -> OpenRouter multimodal model -> branded result view. The API stores the audit result in Neon Postgres when `DATABASE_URL` is configured.
 
 ## Project layout
 
-- `apps/humanize-extension/`: Chrome Manifest V3 side-panel extension.
-- `apps/web/src/app/api/humanize-audit/route.ts`: server-side LLM boundary.
+- `apps/extension/`: Chrome Manifest V3 extension built with WXT, React, and TypeScript.
+- `apps/api/`: FastAPI service, OpenRouter/Exa providers, and SQLAlchemy persistence.
+- `render.yaml`: Render Blueprint for the API service.
 - `docs/TEAM_PLAN.md`: roles, delivery plan, demo script, and acceptance criteria.
 
 ## Setup
 
-**Prerequisites:** Node.js 22+, Google Chrome, and an OpenAI API key with an available multimodal model.
+**Prerequisites:** Node.js 22+, Python 3.12+, Google Chrome, an OpenRouter API key, and a multimodal model available through OpenRouter. Exa and Neon are optional for local development.
 
-Run `npm ci`, copy `.env.example` to `.env`, configure `MODEL_PROVIDER=openai`, `OPENAI_API_KEY`, and `MODEL`, then run `npm run dev:web`.
+Start the API:
 
-In Chrome, open `chrome://extensions`, enable **Developer mode**, select **Load unpacked**, and choose `apps/humanize-extension`.
+```bash
+cd apps/api
+python3 -m venv .venv && source .venv/bin/activate
+pip install -r requirements.txt
+cp .env.example .env
+# Set OPENROUTER_API_KEY. Add DATABASE_URL and EXA_API_KEY when available.
+uvicorn app.main:app --reload --port 8000
+```
+
+Build the extension:
+
+```bash
+npm install
+cp apps/extension/.env.example apps/extension/.env
+npm run build:extension
+```
+
+In Chrome, open `chrome://extensions`, enable **Developer mode**, select **Load unpacked**, and choose the generated `apps/extension/.output/chrome-mv3` directory. Click the Humanize AI toolbar icon, then **Humanize this page**.
+
+### Deploying the API on Render
+
+The root `render.yaml` defines a native Python web service rooted at `apps/api`. Create a Blueprint from the repository, add the secret values in Render, and set `ALLOWED_ORIGINS` to the extension origin after the first unpacked build if you want strict origin allowlisting. Render provides the `PORT` variable; the service exposes `/healthz`.
+
+### Provider roles
+
+- **OpenRouter** is the server-side model gateway. The extension never sees this key.
+- **Exa** is optional web grounding: the API requests fast search results with highlights, then supplies their titles and URLs as optional context to the reviewer.
+- **Neon** supplies hosted Postgres through `DATABASE_URL` (a standard `postgresql://` URL is accepted). The API creates the initial `audit_records` table on startup for the MVP.
+- **Render** hosts the FastAPI web service using the included Blueprint.
 
 ## Safety and privacy
 
@@ -49,7 +78,7 @@ In Chrome, open `chrome://extensions`, enable **Developer mode**, select **Load 
 
 ## Verification
 
-Run `npm run verify` and `npm run build --workspace web`.
+Run `npm run verify` and `npm run test:api`.
 
 ## Inherited vs. hackathon work
 
