@@ -44,6 +44,7 @@ python3 -m venv .venv && source .venv/bin/activate
 pip install -r requirements.txt
 cp .env.example .env
 # Set OPENROUTER_API_KEY. Add DATABASE_URL and EXA_API_KEY when available.
+alembic upgrade head
 uvicorn app.main:app --reload --port 8000
 ```
 
@@ -65,15 +66,18 @@ Build the extension:
 npm install
 cp apps/extension/.env.example apps/extension/.env
 npm run build:extension
+npm run package:extension
 ```
 
 In Chrome, open `chrome://extensions`, enable **Developer mode**, select **Load unpacked**, and choose the generated `apps/extension/.output/chrome-mv3` directory. Click the Humanize AI toolbar icon, then **Humanize this page**.
+
+`npm run package:extension` also creates a versioned ZIP in `apps/extension/.output/`; use the unpacked `chrome-mv3` folder during development.
 
 The extension captures the visible viewport as a screenshot and sends bounded text/structure plus image metadata. It does not upload original image binaries in this first version.
 
 ### Deploying the API on Render
 
-The root `render.yaml` defines a native Python web service rooted at `apps/api`. Create a Blueprint from the repository, add the secret values in Render, and set `ALLOWED_ORIGINS` to the extension origin after the first unpacked build if you want strict origin allowlisting. Render provides the `PORT` variable; the service exposes `/healthz`.
+The root `render.yaml` defines a native Python web service rooted at `apps/api`. Create a Blueprint from the repository, add the secret values in Render, and set `ALLOWED_ORIGINS` to the extension origin after the first unpacked build if you want strict origin allowlisting. Set both Neon connection strings: `DATABASE_URL` is the pooled runtime URL and `DATABASE_URL_UNPOOLED` runs Alembic migrations before startup. Render provides the `PORT` variable; `/healthz` checks process health and `/readyz` verifies database readiness.
 
 ### Provider roles
 
@@ -84,10 +88,9 @@ The root `render.yaml` defines a native Python web service rooted at `apps/api`.
 
 ## Safety and privacy
 
-- The extension never receives or stores the OpenAI key; the local server owns it.
+- The extension never receives or stores the OpenRouter key; the API owns it.
 - An audit is explicitly initiated by the reviewer and uses only the active tab's visible screenshot plus bounded DOM evidence.
 - Page text and HTML are treated as untrusted data, not instructions.
-- The focus preview is temporary and is removed by revert or page refresh.
 - Humanize does not claim to be an AI-authorship detector.
 
 ## Verification
@@ -96,9 +99,9 @@ Run `npm run verify` and `npm run test:api`.
 
 ## Inherited vs. hackathon work
 
-**Inherited:** the Agents, Everywhere starter kit, its monorepo structure, Next.js/CopilotKit infrastructure, model configuration pattern, and verification tooling.
+**Inherited:** the Agents, Everywhere starter kit, its monorepo structure, model configuration pattern, and verification tooling.
 
-**Built during the hackathon:** Humanize's product concept, Chrome extension, screenshot and DOM evidence pipeline, constrained UX-review prompt, server-side audit endpoint, side-panel report, temporary preview, PDF workflow, and project documentation.
+**Built during the hackathon:** Humanize's product concept, Chrome extension, screenshot and DOM evidence pipeline, constrained UX-review prompt, FastAPI audit endpoint, branded popup report, Neon persistence, and project documentation.
 
 ## Team
 

@@ -9,9 +9,11 @@
     "dev:extension": "npm run dev --workspace extension",
     "dev:demo": "python3 -m http.server 4173 --directory apps/demo",
     "build:extension": "npm run build --workspace extension",
+    "package:extension": "npm run zip --workspace extension",
     "typecheck:extension": "npm run typecheck --workspace extension",
     "verify": "npm run typecheck:extension && npm run build:extension",
     "dev:api": "cd apps/api && uvicorn app.main:app --reload --port 8000",
+    "migrate:api": "cd apps/api && alembic upgrade head",
     "test:api": "cd apps/api && pytest"
   },
   "engines": {

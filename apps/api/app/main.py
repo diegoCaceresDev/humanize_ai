@@ -5,11 +5,12 @@ from uuid import UUID, uuid4
 from fastapi import FastAPI, HTTPException, Request
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
-from sqlalchemy import select
+from sqlalchemy import select, text
+from sqlalchemy.exc import SQLAlchemyError
 from sqlalchemy.ext.asyncio import async_sessionmaker, create_async_engine
 
 from .config import get_settings
-from .models import AuditRecord, Base
+from .models import AuditRecord
 from .providers import ProviderError, humanize_page
 from .schemas import AuditRequest, AuditResponse
 
@@ -20,9 +21,6 @@ session_factory = async_sessionmaker(engine, expire_on_commit=False) if engine e
 
 @asynccontextmanager
 async def lifespan(_: FastAPI):
-    if engine:
-        async with engine.begin() as connection:
-            await connection.run_sync(Base.metadata.create_all)
     yield
     if engine:
         await engine.dispose()
@@ -48,6 +46,18 @@ async def reject_oversized_audits(request: Request, call_next):
 @app.get("/healthz")
 async def healthz() -> dict[str, str]:
     return {"status": "ok"}
+
+
+@app.get("/readyz")
+async def readyz() -> dict[str, str]:
+    if engine is None:
+        raise HTTPException(status_code=503, detail="DATABASE_URL is not configured.")
+    try:
+        async with engine.connect() as connection:
+            await connection.execute(text("SELECT 1"))
+    except SQLAlchemyError as exc:
+        raise HTTPException(status_code=503, detail="Database is unavailable.") from exc
+    return {"status": "ready", "database": "connected"}
 
 
 def _result_response(record: AuditRecord) -> AuditResponse:
