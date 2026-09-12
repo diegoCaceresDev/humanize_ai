@@ -20,10 +20,13 @@ export function FlightRecorder({ tabId, evidence, onError }: { tabId: number; ev
   const [inspectionCount, setInspectionCount] = useState(0);
   const [previewMetrics, setPreviewMetrics] = useState<PageMetrics | null>(null);
   const [busy, setBusy] = useState(false);
-  const primary = evidence.elements.find((element) => element.role === "primary-cta");
-  const competitors = evidence.elements.filter((element) => element.role === "competing-cta");
+  const [selectedPrimaryId, setSelectedPrimaryId] = useState<string | null>(null);
+  const rankedPrimary = evidence.elements.find((element) => element.role === "primary-cta");
+  const primary = evidence.elements.find((element) => element.id === selectedPrimaryId) || rankedPrimary;
+  const competitors = evidence.elements.filter((element) => element.id !== primary?.id);
   const inspectable = evidence.elements.slice(0, 6);
-  const previewBlocked = evidence.ranking.ambiguousPrimary;
+  const ambiguousCandidates = evidence.diagnostics.find((diagnostic) => diagnostic.code === "ambiguous-primary-cta")?.evidenceIds.map((id) => evidence.elements.find((element) => element.id === id)).filter((element): element is NonNullable<typeof element> => Boolean(element)) || [];
+  const previewBlocked = evidence.ranking.ambiguousPrimary && !selectedPrimaryId;
 
   useEffect(() => () => {
     void executeInTab<void>(tabId, revertFocusPreview);
@@ -78,10 +81,11 @@ export function FlightRecorder({ tabId, evidence, onError }: { tabId: number; ev
     <section className="section preview-card">
       <div className="section-heading"><span className="eyebrow">Focus Preview</span><span className={`preview-status ${previewBlocked ? "blocked" : ""}`}>{previewMetrics ? "Preview active" : previewBlocked ? "Needs selection" : "Reversible"}</span></div>
       <h2>Test a clearer first action.</h2>
-      <p>Humanize observed <strong>“{primary.label}”</strong> as the most prominent action. {competitors.length ? `It can temporarily soften ${Math.min(competitors.length, 5)} competing action${competitors.length === 1 ? "" : "s"}.` : "It can temporarily make this action easier to inspect."}</p>
+      <p>Humanize observed <strong>“{primary.label}”</strong> as the {selectedPrimaryId ? "reviewer-selected" : "most prominent"} action. {competitors.length ? `It can temporarily soften ${Math.min(competitors.length, 5)} competing action${competitors.length === 1 ? "" : "s"}.` : "It can temporarily make this action easier to inspect."}</p>
+      {previewBlocked && <div className="candidate-picker"><span>Choose the action to emphasize</span>{ambiguousCandidates.map((candidate) => <button key={candidate.id} className="candidate-button" onClick={() => setSelectedPrimaryId(candidate.id)} disabled={busy}>Use “{candidate.label}”</button>)}</div>}
       {!previewMetrics && <div className="preview-actions"><button className="secondary-button" onClick={inspectionCount ? clear : inspect} disabled={busy}>{inspectionCount ? "Clear highlights" : "Inspect on page"}</button><button className="audit-button compact" onClick={preview} disabled={busy || previewBlocked}>{previewBlocked ? "Inspect candidates first" : busy ? "Applying…" : "Apply focus preview"}<span>→</span></button></div>}
       {!!inspectionCount && !previewMetrics && <p className="inspect-state"><span>Inspecting {inspectionCount} elements:</span> {inspectable.slice(0, inspectionCount).map((element) => `“${element.label}”`).join(", ")}</p>}
-      {previewBlocked && !previewMetrics && <p className="preview-warning">Humanize found two equally prominent actions. It will not choose one for you—inspect the candidates and make the decision on the page.</p>}
+      {previewBlocked && !previewMetrics && <p className="preview-warning">Humanize found two equally prominent actions. It will not choose one for you—inspect the candidates, then choose the action you want to test.</p>}
       {previewMetrics && <><div className="comparison"><div><span>Before</span><strong>{evidence.metrics.primaryActionProminence}</strong></div><div><span>Preview</span><strong>{previewMetrics.primaryActionProminence}</strong></div><div><span>Site mutations</span><strong>0</strong></div></div><p className="scope-note">The score is a visual prominence proxy. Humanize has not changed page content, behavior, or conversion.</p><button className="secondary-button full" onClick={revert} disabled={busy}>{busy ? "Reverting…" : "Revert preview"}</button></>}
     </section>
   </>;

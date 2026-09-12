@@ -45,7 +45,7 @@ For the next implementation cycle, follow the [Deterministic Evidence Engine Pla
 
 ## P1 — Reliability and submission readiness
 
-- [ ] Handle navigation and stale tabs during inspect, apply, and revert.
+- [x] Handle navigation, stale tabs, and ambiguous CTA ranking during inspect, apply, and revert.
 - [ ] Clear any active Humanize state when a new audit starts for the same tab.
 - [ ] Add an explicit unavailable-preview state when a model suggestion does not map to live elements.
 - [ ] Store the metric snapshot and preview outcome with persisted audit records.
