@@ -12,7 +12,17 @@ export default defineConfig({
       "https://*.onrender.com/*"
     ],
     action: {
-      default_title: "Humanize this page"
+      default_title: "Humanize this page",
+      default_icon: {
+        "16": "/icons/humanize-mark.png",
+        "32": "/icons/humanize-mark.png",
+        "128": "/icons/humanize-mark.png"
+      }
+    },
+    icons: {
+      "16": "/icons/humanize-mark.png",
+      "32": "/icons/humanize-mark.png",
+      "128": "/icons/humanize-mark.png"
     }
   }
 });

@@ -1,6 +1,6 @@
 # Final user test
 
-Humanize is ready for a full local Chrome workflow using the configured Neon, OpenRouter, and Exa credentials.
+Humanize `v0.1.0` is ready for a full local Chrome workflow using Neon, OpenRouter, and optional Exa credentials. For a fresh clone, complete [team setup](TEAM_SETUP.md) first.
 
 ## 1. Start the API
 
@@ -8,9 +8,8 @@ From the repository root:
 
 ```bash
 source .venv/bin/activate
-cd apps/api
-alembic upgrade head
-uvicorn app.main:app --reload --port 8000
+npm run migrate:api
+npm run dev:api
 ```
 
 Confirm the API and database are ready in another terminal:
@@ -42,7 +41,7 @@ Open `http://localhost:4173` in Chrome. The sample page is intentionally generic
 From the repository root:
 
 ```bash
-npm install
+npm ci
 npm run package:extension
 ```
 
@@ -77,7 +76,7 @@ The returned record should match the report shown in the extension.
 
 ## Troubleshooting
 
-- **`/readyz` returns 503:** run `npx neon@latest env pull --file .env --env DATABASE_URL --env DATABASE_URL_UNPOOLED`, then restart the API.
+- **`/readyz` returns 503:** confirm your Neon URLs are in the root `.env`, run `npm run migrate:api`, then restart the API. Team members with Neon access can run `npx neon@latest env pull --file .env --env DATABASE_URL --env DATABASE_URL_UNPOOLED`.
 - **Popup cannot reach the API:** confirm it is running on `http://localhost:8000`; the extension default uses this URL.
 - **OpenRouter error:** verify `OPEN_ROUTER` or `OPENROUTER_API_KEY` is present in `.env` and restart the API.
 - **No Exa sources:** verify `EXA_AI` or `EXA_API_KEY` and `EXA_ENABLED=true` are present in `.env`; an Exa outage does not block the core audit.

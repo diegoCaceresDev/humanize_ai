@@ -89,18 +89,20 @@ function collectPageContext(): PageContext {
 
 async function captureCurrentPage() {
   const [tab] = await browser.tabs.query({ active: true, currentWindow: true });
-  if (tab.id == null || tab.windowId == null || !tab.url || !/^https?:/i.test(tab.url)) {
+  if (!tab || tab.id == null || tab.windowId == null || !tab.url || !/^https?:/i.test(tab.url)) {
     throw new Error("Open a regular HTTP(S) webpage before auditing it.");
   }
-  const [{ result }] = await browser.scripting.executeScript({ target: { tabId: tab.id }, func: collectPageContext });
+  const executionResults = await browser.scripting.executeScript({ target: { tabId: tab.id }, func: collectPageContext });
+  const result = executionResults[0]?.result;
+  if (!result) throw new Error("Humanize could not read the current page.");
   const screenshot = await browser.tabs.captureVisibleTab(tab.windowId, { format: "jpeg", quality: 72 });
-  return { context: result as PageContext, screenshot };
+  return { context: result, screenshot };
 }
 
 function ResultView({ result, onReset }: { result: AuditResult; onReset: () => void }) {
   return (
     <main className="result-shell">
-      <header className="brand-row"><span className="mark">✦</span><span>Humanize</span><button className="text-button" onClick={onReset}>New audit</button></header>
+      <header className="brand-row"><img className="brand-logo" src="/icons/humanize-mark.png" alt="" /><span>Humanize</span><button className="text-button" onClick={onReset}>New audit</button></header>
       <section className="score-card">
         <div><p className="eyebrow">Humanity score</p><strong>{result.score}</strong><span>/100</span></div>
         <div className="score-copy"><span className="pill">{result.score_label}</span><p>{result.summary}</p><p className="scope-note">Based on the visible viewport and extracted page structure.</p></div>
@@ -133,5 +135,5 @@ export default function App() {
   }
 
   if (result) return <ResultView result={result} onReset={() => setResult(null)} />;
-  return <main className="empty-shell"><div className="brand-row"><span className="mark">✦</span><span>Humanize</span></div><div className="hero"><div className="orb">✦</div><p className="eyebrow">A second set of eyes for the web</p><h1>Make your page feel more human.</h1><p className="lede">Audit the page you’re looking at and get clear, evidence-based ways to make it warmer, sharper, and easier to trust.</p><button className="audit-button" onClick={audit} disabled={loading}>{loading ? <><span className="spinner" />Reading your page…</> : <>Humanize this page <span>→</span></>}</button>{error && <p className="error">{error}</p>}</div><footer>Private by design · Review only what you choose</footer></main>;
+  return <main className="empty-shell"><div className="brand-row"><img className="brand-logo" src="/icons/humanize-mark.png" alt="" /><span>Humanize</span><span className="status-dot" aria-label="Ready" /></div><div className="hero"><div className="orb"><img src="/icons/humanize-mark.png" alt="" /></div><p className="eyebrow">A second set of eyes for the web</p><h1>Make your page feel more human.</h1><p className="lede">A calm, evidence-first review of the page you’re looking at—so you can make clearer decisions with confidence.</p><div className="promise-row"><span>⌁</span><span>Visible viewport + page structure</span></div><button className="audit-button" onClick={audit} disabled={loading}>{loading ? <><span className="spinner" />Reading your page…</> : <>Humanize this page <span>→</span></>}</button>{error && <p className="error">{error}</p>}</div><footer><span>Private by design</span><span>Review only what you choose</span></footer></main>;
 }

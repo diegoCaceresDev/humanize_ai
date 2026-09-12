@@ -1,108 +1,107 @@
-# Humanize
+# Humanize AI
 
-> A browser-native UX review agent that turns vague feedback into grounded, reversible improvements.
+> An evidence-first UX reviewer for the page currently open in Chrome.
 
-Built for **AI Tinkerers - Agents, Everywhere: Bots, Channels & More**.
+**Current release:** [`v0.1.0`](docs/RELEASE_NOTES_v0.1.0.md) · **Status:** ready for a teammate to install and test locally.
 
-## Why Humanize
+Humanize gives a developer, founder, or designer a grounded second opinion on a live page. One click captures bounded page evidence and the visible viewport, sends it to the API, and returns a branded report with a Humanity Score, findings, and practical next steps. It is not an AI-authorship detector.
 
-Teams ship pages quickly, often from templates or AI-assisted generation. That can leave pages with an unclear value proposition, competing calls to action, flat hierarchy, vague copy, or overlooked accessibility basics.
+## What is included
 
-Humanize does not determine whether a page was made with AI. It identifies observable, page-specific UX evidence and proposes improvements a reviewer can inspect and control.
-
-## Demo workflow
-
-1. Open a landing page in Chrome.
-2. Open the Humanize side panel and choose **Audit this page**.
-3. The extension collects the active tab's visible screenshot plus bounded DOM evidence: headings, CTAs, copy, accessibility signals, and structural metrics.
-4. A local audit service sends that evidence to a multimodal model with a constrained system prompt.
-5. Humanize returns a Humanity Score, evidence-based findings, and practical quick wins.
-6. Apply a reversible focus preview, revert it, or save the report as a PDF.
-
-The browser context is essential: the agent reviews the actual page state rather than relying on a pasted screenshot or generic conversation.
+- Chrome Manifest V3 extension built with WXT, React, and TypeScript.
+- One-button active-tab capture for normal HTTP(S) pages.
+- FastAPI audit service with structured model output and branded report data.
+- OpenRouter model integration; the key remains on the server.
+- Optional Exa research grounding.
+- Neon Postgres persistence with Alembic migrations.
+- Render Blueprint for deployment.
+- A local demo page for an end-to-end test.
 
 ## Architecture
 
-Active Chrome tab -> one-button popup -> programmatic capture with the `activeTab` permission -> FastAPI -> optional Exa context -> OpenRouter multimodal model -> branded result view. The API stores the audit result in Neon Postgres when a database URL is configured.
+`Active Chrome tab → extension popup → FastAPI → optional Exa context → OpenRouter → Neon Postgres → result in popup`
 
-## Project layout
+The extension sends the visible screenshot, bounded text/structure, and image metadata. It does not upload original image binaries in this release.
 
-- `apps/extension/`: Chrome Manifest V3 extension built with WXT, React, and TypeScript.
-- `apps/api/`: FastAPI service, OpenRouter/Exa providers, and SQLAlchemy persistence.
-- `render.yaml`: Render Blueprint for the API service.
-- `docs/TEAM_PLAN.md`: roles, delivery plan, demo script, and acceptance criteria.
+## Quick start for teammates
 
-## Setup
-
-**Prerequisites:** Node.js 22+, Python 3.12+, Google Chrome, an OpenRouter API key, and a multimodal model available through OpenRouter. Exa and Neon are optional for local development.
-
-Start the API:
+The complete clone-to-test instructions are in [docs/TEAM_SETUP.md](docs/TEAM_SETUP.md). In short:
 
 ```bash
-cd apps/api
-python3 -m venv .venv && source .venv/bin/activate
-pip install -r requirements.txt
+git clone https://github.com/diegoCaceresDev/humanize_ai.git
+cd humanize_ai
+npm ci
+python3 -m venv .venv
+source .venv/bin/activate
+pip install -r apps/api/requirements.txt
 cp .env.example .env
-# Set OPENROUTER_API_KEY. Add DATABASE_URL and EXA_API_KEY when available.
-alembic upgrade head
-uvicorn app.main:app --reload --port 8000
+# Add provider keys and Neon URLs to .env; see docs/TEAM_SETUP.md.
+npm run migrate:api
+npm run package:extension
 ```
 
-For a no-credentials smoke test, set `DEMO_MODE=true` in `apps/api/.env`. This returns a deterministic sample report while preserving the real extension-to-API flow. A deliberately generic test landing page is included in `apps/demo`; serve it with `npm run dev:demo` and open `http://localhost:4173` in Chrome.
+In separate terminals, run `npm run dev:api` and `npm run dev:demo`, load `apps/extension/.output/chrome-mv3` at `chrome://extensions`, and audit `http://localhost:4173`.
 
-There is also a root [.env.example](/Users/jpino/Development/humanize/.env.example) if you prefer keeping one shared local configuration file. The API accepts both the canonical provider variable names and the existing `OPEN_ROUTER`, `EXA_AI`, and Neon aliases.
+For a provider-free UI smoke test, set `DEMO_MODE=true` in `.env`. That keeps the extension-to-API flow while returning a deterministic sample report.
 
-If the repository is linked to a Neon project, pull its managed connection variables without overwriting the provider settings:
+## Configuration
+
+Copy [.env.example](/Users/jpino/Development/humanize/.env.example) to `.env`; never commit the completed file. The API loads a root `.env` first, then `apps/api/.env`.
+
+| Purpose | Required for live audit | Accepted variables |
+| --- | --- | --- |
+| Model access | Yes | `OPENROUTER_API_KEY` or `OPEN_ROUTER` |
+| Database runtime | Yes for persistence | `DATABASE_URL`, `NEON_DATABASE_URL`, or `NEON_URL` |
+| Migrations | Yes for migrations | `DATABASE_URL_UNPOOLED` or `NEON_DATABASE_URL_UNPOOLED` |
+| Web grounding | Optional | `EXA_API_KEY` or `EXA_AI`, plus `EXA_ENABLED=true` |
+| Extension API URL | Local default works | `apps/extension/.env` → `VITE_API_BASE_URL` |
+
+Use Neon’s pooled connection string for `DATABASE_URL` and its direct/unpooled connection string for `DATABASE_URL_UNPOOLED`. Team members with access to the linked Neon project can pull only those variables with:
 
 ```bash
 npx neon@latest env pull --file .env --env DATABASE_URL --env DATABASE_URL_UNPOOLED
 ```
 
-The application uses the pooled `DATABASE_URL` for normal requests and reserves `DATABASE_URL_UNPOOLED` for future schema migrations.
+## Local commands
 
-Build the extension:
+| Command | Purpose |
+| --- | --- |
+| `npm run dev:api` | Start FastAPI on port 8000 (activate `.venv` first). |
+| `npm run dev:demo` | Serve the sample page on port 4173. |
+| `npm run migrate:api` | Apply Alembic migrations (activate `.venv` first). |
+| `npm run verify` | Type-check and build the extension. |
+| `npm run test:api` | Run API tests (activate `.venv` first). |
+| `npm run package:extension` | Create the loadable build and release ZIP. |
 
-```bash
-npm install
-cp apps/extension/.env.example apps/extension/.env
-npm run build:extension
-npm run package:extension
-```
+## Installing the extension
 
-In Chrome, open `chrome://extensions`, enable **Developer mode**, select **Load unpacked**, and choose the generated `apps/extension/.output/chrome-mv3` directory. Click the Humanize AI toolbar icon, then **Humanize this page**.
+1. Run `npm run package:extension`.
+2. Visit `chrome://extensions`.
+3. Enable **Developer mode**.
+4. Choose **Load unpacked** and select `apps/extension/.output/chrome-mv3`.
+5. Pin **Humanize AI**, visit a normal `http://` or `https://` page, and click **Humanize this page**.
 
-`npm run package:extension` also creates a versioned ZIP in `apps/extension/.output/`; use the unpacked `chrome-mv3` folder during development.
+Chrome does not load an extension ZIP directly in developer mode; unpack the ZIP or use the generated `chrome-mv3` directory. See [the final test workflow](docs/FINAL_TEST.md) for expected results and troubleshooting.
 
-The extension captures the visible viewport as a screenshot and sends bounded text/structure plus image metadata. It does not upload original image binaries in this first version.
+## Deployment
 
-### Deploying the API on Render
+[render.yaml](/Users/jpino/Development/humanize/render.yaml) defines the FastAPI service. Configure the provider secrets and both Neon URLs in Render; startup runs `alembic upgrade head` before Uvicorn. `/healthz` checks process health and `/readyz` checks database connectivity.
 
-The root `render.yaml` defines a native Python web service rooted at `apps/api`. Create a Blueprint from the repository, add the secret values in Render, and set `ALLOWED_ORIGINS` to the extension origin after the first unpacked build if you want strict origin allowlisting. Set both Neon connection strings: `DATABASE_URL` is the pooled runtime URL and `DATABASE_URL_UNPOOLED` runs Alembic migrations before startup. Render provides the `PORT` variable; `/healthz` checks process health and `/readyz` verifies database readiness.
+Set `VITE_API_BASE_URL` to the deployed Render URL before packaging a production extension. Restrict `ALLOWED_ORIGINS` to the final Chrome extension origin once known.
 
-### Provider roles
+## Documentation
 
-- **OpenRouter** is the server-side model gateway. The extension never sees this key.
-- **Exa** is optional web grounding: the API requests fast search results with highlights, then supplies their titles and URLs as optional context to the reviewer.
-- **Neon** supplies hosted Postgres through `DATABASE_URL`, `NEON_DATABASE_URL`, or `NEON_URL` (a standard `postgresql://` URL is accepted). The API creates the initial `audit_records` table on startup for the MVP.
-- **Render** hosts the FastAPI web service using the included Blueprint.
+- [Team setup and test guide](docs/TEAM_SETUP.md)
+- [Final user workflow](docs/FINAL_TEST.md)
+- [Release notes for v0.1.0](docs/RELEASE_NOTES_v0.1.0.md)
+- [Changelog](CHANGELOG.md)
+- [Implementation plan](docs/IMPLEMENTATION_PLAN.md)
+- [Team ownership and acceptance criteria](docs/TEAM_PLAN.md)
+- [Design system](docs/HUMANIZE_DESIGN_SYSTEM.md)
 
-## Safety and privacy
+## Privacy and scope
 
-- The extension never receives or stores the OpenRouter key; the API owns it.
-- An audit is explicitly initiated by the reviewer and uses only the active tab's visible screenshot plus bounded DOM evidence.
-- Page text and HTML are treated as untrusted data, not instructions.
-- Humanize does not claim to be an AI-authorship detector.
-
-## Verification
-
-Run `npm run verify` and `npm run test:api`.
-
-## Inherited vs. hackathon work
-
-**Inherited:** the Agents, Everywhere starter kit, its monorepo structure, model configuration pattern, and verification tooling.
-
-**Built during the hackathon:** Humanize's product concept, Chrome extension, screenshot and DOM evidence pipeline, constrained UX-review prompt, FastAPI audit endpoint, branded popup report, Neon persistence, and project documentation.
-
-## Team
-
-See [the team plan](docs/TEAM_PLAN.md) for ownership, acceptance criteria, risks, and the two-minute demo sequence.
+- An audit is explicitly triggered by the reviewer.
+- The OpenRouter key is server-only and never included in the extension.
+- Page content is untrusted input, not instructions.
+- The report is advisory; the reviewer chooses whether to make any change.
