@@ -46,7 +46,8 @@ class Settings(BaseSettings):
     def _asyncpg_url(value: str) -> str:
         if not value:
             return value
-        parsed = urlsplit(value.replace("postgres://", "postgresql://", 1))
+        normalized_value = value.strip().strip("\\\"'")
+        parsed = urlsplit(normalized_value.replace("postgres://", "postgresql://", 1))
         query = {key: item.strip("\\\"'") for key, item in parse_qsl(parsed.query, keep_blank_values=True)}
         if "sslmode" in query and "ssl" not in query:
             query["ssl"] = query["sslmode"]

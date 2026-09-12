@@ -93,7 +93,7 @@ def test_settings_normalize_neon_ssl_parameters(monkeypatch: pytest.MonkeyPatch)
 
 
 def test_settings_normalize_quoted_neon_ssl_query_value(monkeypatch: pytest.MonkeyPatch) -> None:
-    monkeypatch.setenv("DATABASE_URL", "postgresql://neon.example/db?ssl=require%22")
+    monkeypatch.setenv("DATABASE_URL", "\"postgresql://neon.example/db?ssl=require%22")
     settings = Settings(_env_file=None)
     assert settings.async_database_url == "postgresql+asyncpg://neon.example/db?ssl=require"
 
