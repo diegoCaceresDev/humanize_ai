@@ -9,6 +9,6 @@ __pycache__/
 .env
 .env.*
 !.env.example
+.neon
 coverage/
 .DS_Store
-
