@@ -1,9 +1,10 @@
 from contextlib import asynccontextmanager
 from datetime import datetime, timezone
-from uuid import uuid4
+from uuid import UUID, uuid4
 
 from fastapi import FastAPI, HTTPException, Request
 from fastapi.middleware.cors import CORSMiddleware
+from sqlalchemy import select
 from sqlalchemy.ext.asyncio import async_sessionmaker, create_async_engine
 
 from .config import get_settings
@@ -35,6 +36,10 @@ async def healthz() -> dict[str, str]:
     return {"status": "ok"}
 
 
+def _result_response(record: AuditRecord) -> AuditResponse:
+    return AuditResponse(id=record.id, url=record.url, created_at=record.created_at, **record.result)
+
+
 @app.post("/api/audits", response_model=AuditResponse)
 async def create_audit(payload: AuditRequest, request: Request) -> AuditResponse:
     body_length = request.headers.get("content-length")
@@ -56,3 +61,18 @@ async def create_audit(payload: AuditRequest, request: Request) -> AuditResponse
             await session.commit()
             audit_id = record.id
     return AuditResponse(id=audit_id, url=str(payload.context.url), created_at=now, **result.model_dump())
+
+
+@app.get("/api/audits/{audit_id}", response_model=AuditResponse)
+async def get_audit(audit_id: str) -> AuditResponse:
+    if session_factory is None:
+        raise HTTPException(status_code=503, detail="Audit history is unavailable until DATABASE_URL is configured.")
+    try:
+        normalized_id = str(UUID(audit_id))
+    except ValueError as exc:
+        raise HTTPException(status_code=404, detail="Audit not found.") from exc
+    async with session_factory() as session:
+        record = await session.scalar(select(AuditRecord).where(AuditRecord.id == normalized_id))
+    if record is None:
+        raise HTTPException(status_code=404, detail="Audit not found.")
+    return _result_response(record)

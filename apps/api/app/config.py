@@ -8,7 +8,7 @@ from pydantic_settings import BaseSettings, SettingsConfigDict
 class Settings(BaseSettings):
     app_env: str = "development"
     demo_mode: bool = False
-    database_url: str = ""
+    database_url: str = Field(default="", validation_alias=AliasChoices("DATABASE_URL", "NEON_DATABASE_URL", "NEON_URL"))
     openrouter_api_key: str = Field(default="", validation_alias=AliasChoices("OPENROUTER_API_KEY", "OPEN_ROUTER"))
     openrouter_model: str = "google/gemini-2.5-flash"
     exa_api_key: str = Field(default="", validation_alias=AliasChoices("EXA_API_KEY", "EXA_AI"))

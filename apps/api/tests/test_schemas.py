@@ -1,9 +1,11 @@
 import asyncio
 
 import pytest
+from fastapi.testclient import TestClient
 from pydantic import ValidationError
 
 from app.config import Settings
+from app import main
 from app.providers import _clean_json, humanize_page
 from app.schemas import AuditRequest, PageContext
 
@@ -30,3 +32,16 @@ def test_settings_accept_existing_local_key_names(monkeypatch: pytest.MonkeyPatc
     settings = Settings()
     assert settings.openrouter_api_key == "openrouter-test-key"
     assert settings.exa_api_key == "exa-test-key"
+
+
+def test_settings_accept_neon_database_alias(monkeypatch: pytest.MonkeyPatch) -> None:
+    monkeypatch.setenv("NEON_DATABASE_URL", "postgresql://neon.example/db")
+    settings = Settings()
+    assert settings.database_url == "postgresql://neon.example/db"
+    assert settings.async_database_url == "postgresql+asyncpg://neon.example/db"
+
+
+def test_history_endpoint_explains_missing_database(monkeypatch: pytest.MonkeyPatch) -> None:
+    monkeypatch.setattr(main, "session_factory", None)
+    response = TestClient(main.app).get("/api/audits/00000000-0000-0000-0000-000000000000")
+    assert response.status_code == 503

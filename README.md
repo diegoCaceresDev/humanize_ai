@@ -23,7 +23,7 @@ The browser context is essential: the agent reviews the actual page state rather
 
 ## Architecture
 
-Active Chrome tab -> one-button popup -> programmatic capture with the `activeTab` permission -> FastAPI -> optional Exa context -> OpenRouter multimodal model -> branded result view. The API stores the audit result in Neon Postgres when `DATABASE_URL` is configured.
+Active Chrome tab -> one-button popup -> programmatic capture with the `activeTab` permission -> FastAPI -> optional Exa context -> OpenRouter multimodal model -> branded result view. The API stores the audit result in Neon Postgres when a database URL is configured.
 
 ## Project layout
 
@@ -69,7 +69,7 @@ The root `render.yaml` defines a native Python web service rooted at `apps/api`.
 
 - **OpenRouter** is the server-side model gateway. The extension never sees this key.
 - **Exa** is optional web grounding: the API requests fast search results with highlights, then supplies their titles and URLs as optional context to the reviewer.
-- **Neon** supplies hosted Postgres through `DATABASE_URL` (a standard `postgresql://` URL is accepted). The API creates the initial `audit_records` table on startup for the MVP.
+- **Neon** supplies hosted Postgres through `DATABASE_URL`, `NEON_DATABASE_URL`, or `NEON_URL` (a standard `postgresql://` URL is accepted). The API creates the initial `audit_records` table on startup for the MVP.
 - **Render** hosts the FastAPI web service using the included Blueprint.
 
 ## Safety and privacy
