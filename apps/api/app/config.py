@@ -22,6 +22,7 @@ class Settings(BaseSettings):
         env_file=(Path(__file__).resolve().parents[3] / ".env", ".env"),
         env_file_encoding="utf-8",
         extra="ignore",
+        populate_by_name=True,
     )
 
     @property
