@@ -100,10 +100,10 @@ async function captureCurrentPage() {
 function ResultView({ result, onReset }: { result: AuditResult; onReset: () => void }) {
   return (
     <main className="result-shell">
-      <header className="brand-row"><span className="mark">✦</span><span>HUMANIZE AI</span><button className="text-button" onClick={onReset}>New audit</button></header>
+      <header className="brand-row"><span className="mark">✦</span><span>Humanize</span><button className="text-button" onClick={onReset}>New audit</button></header>
       <section className="score-card">
         <div><p className="eyebrow">Humanity score</p><strong>{result.score}</strong><span>/100</span></div>
-        <div className="score-copy"><span className="pill">{result.score_label}</span><p>{result.summary}</p></div>
+        <div className="score-copy"><span className="pill">{result.score_label}</span><p>{result.summary}</p><p className="scope-note">Based on the visible viewport and extracted page structure.</p></div>
       </section>
       <section className="section"><div className="section-heading"><span className="eyebrow">01 / Findings</span><span className="muted">{result.findings.length} signals</span></div>
         {result.findings.map((finding, index) => <article className="finding" key={`${finding.title}-${index}`}><div className={`severity ${finding.severity}`}>{finding.severity}</div><h3>{finding.title}</h3><p className="evidence">“{finding.evidence}”</p><p>{finding.recommendation}</p></article>)}
@@ -133,5 +133,5 @@ export default function App() {
   }
 
   if (result) return <ResultView result={result} onReset={() => setResult(null)} />;
-  return <main className="empty-shell"><div className="brand-row"><span className="mark">✦</span><span>HUMANIZE AI</span></div><div className="hero"><div className="orb">✦</div><p className="eyebrow">A second set of eyes for the web</p><h1>Make your page feel more human.</h1><p className="lede">Audit the page you’re looking at and get clear, evidence-based ways to make it warmer, sharper, and easier to trust.</p><button className="audit-button" onClick={audit} disabled={loading}>{loading ? <><span className="spinner" />Reading your page…</> : <>Humanize this page <span>→</span></>}</button>{error && <p className="error">{error}</p>}</div><footer>Private by design · Review only what you choose</footer></main>;
+  return <main className="empty-shell"><div className="brand-row"><span className="mark">✦</span><span>Humanize</span></div><div className="hero"><div className="orb">✦</div><p className="eyebrow">A second set of eyes for the web</p><h1>Make your page feel more human.</h1><p className="lede">Audit the page you’re looking at and get clear, evidence-based ways to make it warmer, sharper, and easier to trust.</p><button className="audit-button" onClick={audit} disabled={loading}>{loading ? <><span className="spinner" />Reading your page…</> : <>Humanize this page <span>→</span></>}</button>{error && <p className="error">{error}</p>}</div><footer>Private by design · Review only what you choose</footer></main>;
 }

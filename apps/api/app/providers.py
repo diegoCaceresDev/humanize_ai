@@ -29,9 +29,9 @@ async def exa_context(page: PageContext, settings: Settings) -> list[ResearchSou
     query = f"website UX patterns for {page.title or page.url.host} landing page clarity trust accessibility"
     body = {
         "query": query[:500],
-        "type": "fast",
+        "type": "auto",
         "numResults": 3,
-        "contents": {"highlights": {"query": "clear UX, trust, accessibility, and conversion patterns", "maxCharacters": 600}},
+        "contents": {"highlights": True},
     }
     try:
         async with httpx.AsyncClient(timeout=12) as client:

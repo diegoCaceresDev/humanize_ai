@@ -22,3 +22,11 @@ def test_demo_mode_produces_a_valid_audit() -> None:
     result = asyncio.run(humanize_page(page, "data:image/jpeg;base64,abc", Settings(demo_mode=True)))
     assert result.score == 68
     assert result.findings[0].evidence == "A useful headline"
+
+
+def test_settings_accept_existing_local_key_names(monkeypatch: pytest.MonkeyPatch) -> None:
+    monkeypatch.setenv("OPEN_ROUTER", "openrouter-test-key")
+    monkeypatch.setenv("EXA_AI", "exa-test-key")
+    settings = Settings()
+    assert settings.openrouter_api_key == "openrouter-test-key"
+    assert settings.exa_api_key == "exa-test-key"
