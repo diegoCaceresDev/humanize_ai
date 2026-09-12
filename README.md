@@ -138,6 +138,7 @@ render.yaml   # Render deployment blueprint
 - [Team ownership and acceptance criteria](docs/TEAM_PLAN.md)
 - [Humanize design system](docs/HUMANIZE_DESIGN_SYSTEM.md)
 - [UX Flight Recorder plan](docs/UX_FLIGHT_RECORDER_PLAN.md)
+- [Deterministic Evidence Engine plan](docs/DETERMINISTIC_EVIDENCE_PLAN.md)
 - [Submission checklist](SUBMISSION.md)
 - [Release notes](docs/RELEASE_NOTES_v0.2.0.md)
 - [Cloud test deployment](docs/CLOUD_TEST_DEPLOYMENT.md)

@@ -2,6 +2,8 @@
 
 This list follows the selected **Focus Preview** scope in [UX Flight Recorder Plan](UX_FLIGHT_RECORDER_PLAN.md). Complete the P0 items before adding any broader redesign or team features.
 
+For the next implementation cycle, follow the [Deterministic Evidence Engine Plan](DETERMINISTIC_EVIDENCE_PLAN.md). It defines the versioned formulas, test strategy, and model boundary required before adding more preview types or persisted history.
+
 ## P0 — Demo-critical core workflow
 
 - [x] Create a shared `pageEvidence` module in the extension.
