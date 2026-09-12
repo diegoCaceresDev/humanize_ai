@@ -71,6 +71,7 @@ export function FlightRecorder({ tabId, evidence, onError }: { tabId: number; ev
       <div className="section-heading"><span className="eyebrow">Measured on this page</span><span className="method-tag">Browser evidence</span></div>
       <Metric label="Visible CTAs" value={evidence.metrics.visibleCtaCount} detail={`${evidence.metrics.heroCtaCount} in the first viewport`} />
       <Metric label="Primary action" value={evidence.metrics.primaryCtaLabel} detail={`${evidence.metrics.primaryActionProminence}/100 visual prominence`} />
+      <Metric label="Heading structure" value={evidence.headings.length} detail={evidence.headings.length ? evidence.headings.map((heading) => heading.level.toUpperCase()).join(" → ") : "No visible headings detected"} />
       <Metric label="Accessibility signals" value={evidence.metrics.missingAltCount + evidence.metrics.unlabeledFormFieldCount} detail={`${evidence.metrics.missingAltCount} missing alt · ${evidence.metrics.unlabeledFormFieldCount} unlabeled fields`} />
     </section>
     <section className="section preview-card">
@@ -78,6 +79,7 @@ export function FlightRecorder({ tabId, evidence, onError }: { tabId: number; ev
       <h2>Test a clearer first action.</h2>
       <p>Humanize observed <strong>“{primary.label}”</strong> as the most prominent action. {competitors.length ? `It can temporarily soften ${Math.min(competitors.length, 5)} competing action${competitors.length === 1 ? "" : "s"}.` : "It can temporarily make this action easier to inspect."}</p>
       {!previewMetrics && <div className="preview-actions"><button className="secondary-button" onClick={inspectionCount ? clear : inspect} disabled={busy}>{inspectionCount ? "Clear highlights" : "Inspect on page"}</button><button className="audit-button compact" onClick={preview} disabled={busy}>{busy ? "Applying…" : "Apply focus preview"}<span>→</span></button></div>}
+      {!!inspectionCount && !previewMetrics && <p className="inspect-state"><span>Inspecting {inspectionCount} elements:</span> {inspectable.slice(0, inspectionCount).map((element) => `“${element.label}”`).join(", ")}</p>}
       {previewMetrics && <><div className="comparison"><div><span>Before</span><strong>{evidence.metrics.primaryActionProminence}</strong></div><div><span>Preview</span><strong>{previewMetrics.primaryActionProminence}</strong></div><div><span>Site mutations</span><strong>0</strong></div></div><p className="scope-note">The score is a visual prominence proxy. Humanize has not changed page content, behavior, or conversion.</p><button className="secondary-button full" onClick={revert} disabled={busy}>{busy ? "Reverting…" : "Revert preview"}</button></>}
     </section>
   </>;

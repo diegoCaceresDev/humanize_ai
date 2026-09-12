@@ -7,7 +7,7 @@ This list follows the selected **Focus Preview** scope in [UX Flight Recorder Pl
 - [x] Create a shared `pageEvidence` module in the extension.
   - [x] Collect CTA candidates with text, semantic type, bounding box, and viewport visibility.
   - [x] Identify the top-viewport/hero region without depending on page-specific selectors.
-  - [ ] Collect heading bounds in addition to the existing ordered heading structure.
+  - [x] Collect heading bounds in addition to the existing ordered heading structure.
   - [x] Count visible images with empty alt text.
   - [x] Detect visible form fields without labels or accessible names.
   - [x] Normalize all text, cap collections, and omit form values.
@@ -25,12 +25,12 @@ This list follows the selected **Focus Preview** scope in [UX Flight Recorder Pl
 - [x] Build the evidence-inspection interaction in the popup.
   - [x] “Inspect on page” highlights only referenced elements.
   - [x] “Clear highlights” removes only Humanize annotations.
-  - [ ] Show the exact labels and count of highlighted elements in the inspect state.
+  - [x] Show the exact labels and count of highlighted elements in the inspect state.
 - [x] Build Focus Preview in the active tab.
   - [x] Require an explicit click before injecting any styles.
   - [x] Use a namespaced `<style>` element and `data-humanize-*` attributes only.
   - [x] Highlight the suggested primary CTA and soften, but do not hide or disable, competing CTAs.
-  - [ ] Add an in-page “Preview only” annotation in addition to the popup status.
+  - [x] Add an in-page “Preview only” annotation in addition to the popup status.
   - [x] Revert by removing Humanize-owned style and attributes only.
 - [x] Implement before/preview measurement comparison.
   - [x] Recalculate from the same collector used for the original audit.
@@ -48,11 +48,11 @@ This list follows the selected **Focus Preview** scope in [UX Flight Recorder Pl
 - [ ] Add an explicit unavailable-preview state when a model suggestion does not map to live elements.
 - [ ] Store the metric snapshot and preview outcome with persisted audit records.
 - [ ] Add a view/reload path for a saved audit report.
-- [ ] Add a root `SUBMISSION.md`.
-  - [ ] Describe the browser-native core interaction.
-  - [ ] Separate inherited starter code from hackathon work.
-  - [ ] List live and optional integrations.
-  - [ ] Include clean-clone and demo steps.
+- [x] Add a root `SUBMISSION.md`.
+  - [x] Describe the browser-native core interaction.
+  - [x] Separate inherited starter code from hackathon work.
+  - [x] List live and optional integrations.
+  - [x] Include clean-clone and demo steps.
 - [ ] Prepare a two-minute recording using the demo narrative in the plan.
 - [ ] Run `npm run verify` and `npm run test:api` against the final commit.
 
@@ -71,8 +71,8 @@ This list follows the selected **Focus Preview** scope in [UX Flight Recorder Pl
 
 ## Non-negotiable safeguards
 
-- [ ] No target-site writes, clicks, form submissions, or navigation.
-- [ ] No preview starts without explicit user action.
-- [ ] No user input values, passwords, tokens, or private DOM data in stored evidence.
-- [ ] No claims that a preview proves accessibility compliance, conversion, or usability outcomes.
-- [ ] No provider key or secret in the extension bundle, screenshots, test fixtures, commits, or demo recording.
+- [x] No target-site writes, clicks, form submissions, or navigation.
+- [x] No preview starts without explicit user action.
+- [x] No user input values, passwords, tokens, or private DOM data in stored evidence.
+- [x] No claims that a preview proves accessibility compliance, conversion, or usability outcomes.
+- [x] No provider key or secret in the extension bundle, screenshots, test fixtures, commits, or demo recording.

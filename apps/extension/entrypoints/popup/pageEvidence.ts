@@ -24,6 +24,14 @@ export type ElementEvidence = {
   prominence: number;
 };
 
+export type HeadingEvidence = {
+  id: string;
+  level: string;
+  label: string;
+  bounds: { x: number; y: number; width: number; height: number };
+  viewportVisible: boolean;
+};
+
 export type PageMetrics = {
   visibleCtaCount: number;
   heroCtaCount: number;
@@ -36,6 +44,7 @@ export type PageMetrics = {
 
 export type BrowserEvidence = {
   elements: ElementEvidence[];
+  headings: HeadingEvidence[];
   metrics: PageMetrics;
 };
 
@@ -108,11 +117,21 @@ export function collectPageEvidence(): CapturedPage {
   const root = document.querySelector("main") || document.body;
   const snapshot = root.cloneNode(true) as HTMLElement;
   snapshot.querySelectorAll("script, style, noscript, template, svg").forEach((element) => element.remove());
-  const headings = Array.from(document.querySelectorAll("h1, h2, h3"))
+  const headingEvidence = Array.from(document.querySelectorAll("h1, h2, h3"))
     .filter(isVisible)
-    .map((element) => ({ level: element.tagName.toLowerCase(), text: text(element) }))
-    .filter((item) => item.text)
+    .map((element, index) => {
+      const box = element.getBoundingClientRect();
+      return {
+        id: `heading-${index + 1}`,
+        level: element.tagName.toLowerCase(),
+        label: text(element).slice(0, 500),
+        bounds: { x: Math.round(box.left), y: Math.round(box.top), width: Math.round(box.width), height: Math.round(box.height) },
+        viewportVisible: box.bottom > 0 && box.top < viewportHeight && box.right > 0 && box.left < window.innerWidth,
+      };
+    })
+    .filter((item) => item.label)
     .slice(0, 100);
+  const headings = headingEvidence.map(({ level, label }) => ({ level, text: label }));
   const images = Array.from(document.images)
     .filter(isVisible)
     .map((image) => ({ src: image.currentSrc || image.src, alt: image.alt, width: image.naturalWidth || Math.round(image.getBoundingClientRect().width), height: image.naturalHeight || Math.round(image.getBoundingClientRect().height) }))
@@ -150,6 +169,7 @@ export function collectPageEvidence(): CapturedPage {
     },
     evidence: {
       elements,
+      headings: headingEvidence,
       metrics: {
         visibleCtaCount: elements.length,
         heroCtaCount: rawCtas.filter((cta) => cta.inHero).length,

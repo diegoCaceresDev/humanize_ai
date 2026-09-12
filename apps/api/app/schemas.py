@@ -58,6 +58,14 @@ class BrowserElementEvidence(BaseModel):
     prominence: int = Field(ge=0, le=100)
 
 
+class BrowserHeadingEvidence(BaseModel):
+    id: str = Field(max_length=100)
+    level: Literal["h1", "h2", "h3"]
+    label: str = Field(max_length=500)
+    bounds: ElementBounds
+    viewportVisible: bool
+
+
 class BrowserMetrics(BaseModel):
     visibleCtaCount: int = Field(ge=0, le=40)
     heroCtaCount: int = Field(ge=0, le=40)
@@ -70,6 +78,7 @@ class BrowserMetrics(BaseModel):
 
 class BrowserEvidence(BaseModel):
     elements: list[BrowserElementEvidence] = Field(default_factory=list, max_length=40)
+    headings: list[BrowserHeadingEvidence] = Field(default_factory=list, max_length=100)
     metrics: BrowserMetrics
 
 

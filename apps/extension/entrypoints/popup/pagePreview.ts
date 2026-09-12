@@ -39,12 +39,14 @@ export function clearInspection(): void {
 
 export function applyFocusPreview(primary: ElementEvidence, competitors: ElementEvidence[]): PreviewResult {
   document.getElementById("humanize-focus-preview")?.remove();
+  document.getElementById("humanize-preview-notice")?.remove();
   document.querySelectorAll("[data-humanize-preview]").forEach((element) => element.removeAttribute("data-humanize-preview"));
   const style = document.createElement("style");
   style.id = "humanize-focus-preview";
   style.textContent = `
     [data-humanize-preview="primary"] { outline: 3px solid #c8f36b !important; outline-offset: 5px !important; box-shadow: 0 0 0 7px rgba(115, 87, 255, .28) !important; }
     [data-humanize-preview="competing"] { opacity: .42 !important; filter: saturate(.55) !important; }
+    #humanize-preview-notice { position: fixed !important; right: 18px !important; bottom: 18px !important; z-index: 2147483647 !important; padding: 9px 12px !important; border: 1px solid #7357ff !important; border-radius: 999px !important; background: #11131a !important; color: #f8f8f5 !important; font: 600 12px/1.2 system-ui, sans-serif !important; box-shadow: 0 8px 24px rgba(0, 0, 0, .28) !important; pointer-events: none !important; }
   `;
   document.documentElement.append(style);
   const matchesEvidence = (element: Element, label: string) => {
@@ -64,11 +66,20 @@ export function applyFocusPreview(primary: ElementEvidence, competitors: Element
   };
   primaryFound = mark(primary, "primary");
   const applied = competitors.slice(0, 5).filter((competitor) => mark(competitor, "competing")).length + Number(primaryFound);
-  if (!primaryFound) style.remove();
+  if (!primaryFound) {
+    style.remove();
+  } else {
+    const notice = document.createElement("div");
+    notice.id = "humanize-preview-notice";
+    notice.setAttribute("role", "status");
+    notice.textContent = "Humanize preview only · no site changes saved";
+    document.documentElement.append(notice);
+  }
   return { applied, primaryFound };
 }
 
 export function revertFocusPreview(): void {
   document.getElementById("humanize-focus-preview")?.remove();
+  document.getElementById("humanize-preview-notice")?.remove();
   document.querySelectorAll("[data-humanize-preview]").forEach((element) => element.removeAttribute("data-humanize-preview"));
 }

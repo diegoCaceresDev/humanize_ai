@@ -39,6 +39,7 @@ function browserEvidenceForApi(evidence: BrowserEvidence) {
   return {
     metrics: evidence.metrics,
     elements: evidence.elements.map(({ locator: _locator, ...element }) => element),
+    headings: evidence.headings,
   };
 }
 

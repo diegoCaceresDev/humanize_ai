@@ -21,11 +21,13 @@ def test_audit_request_accepts_bounded_browser_evidence() -> None:
         "screenshot": "data:image/jpeg;base64,abc",
         "browser_evidence": {
             "elements": [{"id": "cta-1", "role": "primary-cta", "label": "Book a demo", "bounds": {"x": 10, "y": 20, "width": 120, "height": 40}, "viewportVisible": True, "prominence": 72}],
+            "headings": [{"id": "heading-1", "level": "h1", "label": "A clear promise", "bounds": {"x": 10, "y": 20, "width": 240, "height": 60}, "viewportVisible": True}],
             "metrics": {"visibleCtaCount": 3, "heroCtaCount": 2, "missingAltCount": 1, "unlabeledFormFieldCount": 0, "primaryActionProminence": 72, "primaryCtaLabel": "Book a demo", "method": "browser-structural-v1"},
         },
     })
     assert request.browser_evidence is not None
     assert request.browser_evidence.elements[0].label == "Book a demo"
+    assert request.browser_evidence.headings[0].level == "h1"
 
 
 def test_browser_evidence_rejects_unbounded_prominence() -> None:

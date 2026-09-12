@@ -44,3 +44,4 @@ footer { display: flex; justify-content: space-between; color: var(--hz-muted); 
 .comparison span { display: block; color: var(--hz-muted); font-size: 9px; text-transform: uppercase; letter-spacing: .06em; }
 .comparison strong { display: block; margin-top: 7px; color: var(--hz-lime); font-size: 18px; letter-spacing: -.04em; }
 .secondary-button.full { width: 100%; margin-top: 13px; }
+.inspect-state { margin-top: 11px !important; color: var(--hz-muted) !important; font-size: 10px !important; line-height: 1.45 !important; }.inspect-state span { color: var(--hz-lime); font-weight: 700; }
