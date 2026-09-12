@@ -51,6 +51,14 @@ For a no-credentials smoke test, set `DEMO_MODE=true` in `apps/api/.env`. This r
 
 There is also a root [.env.example](/Users/jpino/Development/humanize/.env.example) if you prefer keeping one shared local configuration file. The API accepts both the canonical provider variable names and the existing `OPEN_ROUTER`, `EXA_AI`, and Neon aliases.
 
+If the repository is linked to a Neon project, pull its managed connection variables without overwriting the provider settings:
+
+```bash
+npx neon@latest env pull --file .env --env DATABASE_URL --env DATABASE_URL_UNPOOLED
+```
+
+The application uses the pooled `DATABASE_URL` for normal requests and reserves `DATABASE_URL_UNPOOLED` for future schema migrations.
+
 Build the extension:
 
 ```bash

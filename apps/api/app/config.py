@@ -1,5 +1,6 @@
 from functools import lru_cache
 from pathlib import Path
+from urllib.parse import parse_qsl, urlencode, urlsplit, urlunsplit
 
 from pydantic import AliasChoices, Field
 from pydantic_settings import BaseSettings, SettingsConfigDict
@@ -9,6 +10,7 @@ class Settings(BaseSettings):
     app_env: str = "development"
     demo_mode: bool = False
     database_url: str = Field(default="", validation_alias=AliasChoices("DATABASE_URL", "NEON_DATABASE_URL", "NEON_URL"))
+    database_url_unpooled: str = Field(default="", validation_alias=AliasChoices("DATABASE_URL_UNPOOLED", "NEON_DATABASE_URL_UNPOOLED"))
     openrouter_api_key: str = Field(default="", validation_alias=AliasChoices("OPENROUTER_API_KEY", "OPEN_ROUTER"))
     openrouter_model: str = "google/gemini-2.5-flash"
     exa_api_key: str = Field(default="", validation_alias=AliasChoices("EXA_API_KEY", "EXA_AI"))
@@ -28,9 +30,24 @@ class Settings(BaseSettings):
 
     @property
     def async_database_url(self) -> str:
-        if self.database_url.startswith("postgresql://"):
-            return self.database_url.replace("postgresql://", "postgresql+asyncpg://", 1)
-        return self.database_url
+        return self._asyncpg_url(self.database_url)
+
+    @property
+    def async_database_url_unpooled(self) -> str:
+        return self._asyncpg_url(self.database_url_unpooled)
+
+    @staticmethod
+    def _asyncpg_url(value: str) -> str:
+        if not value:
+            return value
+        parsed = urlsplit(value.replace("postgres://", "postgresql://", 1))
+        query = dict(parse_qsl(parsed.query, keep_blank_values=True))
+        if "sslmode" in query and "ssl" not in query:
+            query["ssl"] = query["sslmode"]
+        query.pop("sslmode", None)
+        query.pop("channel_binding", None)
+        normalized = urlunsplit(parsed._replace(query=urlencode(query)))
+        return normalized.replace("postgresql://", "postgresql+asyncpg://", 1)
 
 
 @lru_cache

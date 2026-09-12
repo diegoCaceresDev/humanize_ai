@@ -29,16 +29,24 @@ def test_demo_mode_produces_a_valid_audit() -> None:
 def test_settings_accept_existing_local_key_names(monkeypatch: pytest.MonkeyPatch) -> None:
     monkeypatch.setenv("OPEN_ROUTER", "openrouter-test-key")
     monkeypatch.setenv("EXA_AI", "exa-test-key")
-    settings = Settings()
+    settings = Settings(_env_file=None)
     assert settings.openrouter_api_key == "openrouter-test-key"
     assert settings.exa_api_key == "exa-test-key"
 
 
 def test_settings_accept_neon_database_alias(monkeypatch: pytest.MonkeyPatch) -> None:
     monkeypatch.setenv("NEON_DATABASE_URL", "postgresql://neon.example/db")
-    settings = Settings()
+    monkeypatch.setenv("DATABASE_URL_UNPOOLED", "postgresql://direct.neon.example/db?sslmode=require&channel_binding=require")
+    settings = Settings(_env_file=None)
     assert settings.database_url == "postgresql://neon.example/db"
     assert settings.async_database_url == "postgresql+asyncpg://neon.example/db"
+    assert settings.async_database_url_unpooled == "postgresql+asyncpg://direct.neon.example/db?ssl=require"
+
+
+def test_settings_normalize_neon_ssl_parameters(monkeypatch: pytest.MonkeyPatch) -> None:
+    monkeypatch.setenv("DATABASE_URL", "postgresql://neon.example/db?sslmode=require&channel_binding=require")
+    settings = Settings()
+    assert settings.async_database_url == "postgresql+asyncpg://neon.example/db?ssl=require"
 
 
 def test_history_endpoint_explains_missing_database(monkeypatch: pytest.MonkeyPatch) -> None:
