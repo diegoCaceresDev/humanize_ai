@@ -47,7 +47,7 @@ class Settings(BaseSettings):
         if not value:
             return value
         parsed = urlsplit(value.replace("postgres://", "postgresql://", 1))
-        query = dict(parse_qsl(parsed.query, keep_blank_values=True))
+        query = {key: item.strip("\\\"'") for key, item in parse_qsl(parsed.query, keep_blank_values=True)}
         if "sslmode" in query and "ssl" not in query:
             query["ssl"] = query["sslmode"]
         query.pop("sslmode", None)

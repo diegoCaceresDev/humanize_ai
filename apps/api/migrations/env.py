@@ -18,7 +18,10 @@ database_url = settings.async_database_url_unpooled or settings.async_database_u
 if not database_url:
     raise RuntimeError("DATABASE_URL_UNPOOLED or DATABASE_URL is required to run migrations.")
 
-config.set_main_option("sqlalchemy.url", database_url)
+# Alembic stores the URL in ConfigParser, where a literal percent begins an
+# interpolation token. Neon URLs may contain percent-encoded credentials or
+# query parameters, so escape them before setting the ConfigParser option.
+config.set_main_option("sqlalchemy.url", database_url.replace("%", "%%"))
 target_metadata = Base.metadata
 
 
