@@ -23,3 +23,24 @@ footer { display: flex; justify-content: space-between; color: var(--hz-muted); 
 .score-card { display: grid; grid-template-columns: 116px 1fr; gap: 16px; margin-top: 31px; padding: 18px; border: 1px solid #303541; border-radius: 10px; background: #191c24; }.score-card strong { display: block; margin-top: 6px; color: var(--hz-lime); font-size: 50px; line-height: .9; letter-spacing: -.08em; }.score-card > div > span { color: var(--hz-muted); font-size: 12px; }.score-copy { padding-top: 3px; }.score-copy p { margin: 11px 0 0; color: var(--hz-dark-muted); font-size: 12px; line-height: 1.5; }.scope-note { color: var(--hz-muted) !important; font-size: 10px !important; }.pill { display: inline-block; padding: 5px 8px; border-radius: 100px; background: #2b3450; color: #d7d1ff; font-size: 10px; font-weight: 700; text-transform: uppercase; }
 .section { margin-top: 28px; }.section-heading { display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 12px; }.muted { color: var(--hz-muted); font-size: 10px; }.finding { padding: 15px 0; border-top: 1px solid #303541; }.finding h3 { margin: 7px 0 7px; color: var(--hz-canvas); font-size: 15px; }.finding p { margin: 0; color: var(--hz-dark-muted); font-size: 12px; line-height: 1.5; }.finding .evidence { margin-bottom: 7px; color: var(--hz-lime); font-style: italic; }.severity { display: inline-block; font-size: 9px; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; }.severity.high { color: var(--hz-coral); }.severity.medium { color: #e6d18c; }.severity.low { color: var(--hz-lime); }
 .quick-wins { margin: 0; padding: 0; list-style: none; }.quick-wins li { padding: 10px 0 10px 19px; border-top: 1px solid #303541; color: var(--hz-dark-muted); font-size: 12px; line-height: 1.45; position: relative; }.quick-wins li::before { content: "✦"; position: absolute; left: 0; color: var(--hz-lime); }.sources a { display: flex; justify-content: space-between; padding: 10px 0; border-top: 1px solid #303541; color: var(--hz-dark-muted); font-size: 11px; text-decoration: none; }.sources a span { color: var(--hz-violet); }
+.measured-card, .preview-card { padding: 16px; border: 1px solid #303541; border-radius: 10px; background: #191c24; }
+.measured-card .section-heading, .preview-card .section-heading { margin-bottom: 10px; }
+.method-tag, .preview-status { padding: 4px 7px; border-radius: 999px; background: #29331d; color: var(--hz-lime); font-size: 9px; font-weight: 700; letter-spacing: .06em; text-transform: uppercase; }
+.preview-status { background: #2b3450; color: #d7d1ff; }
+.metric-row { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 2px 12px; padding: 10px 0; border-top: 1px solid #303541; }
+.metric-row:first-of-type { border-top: 0; }
+.metric-row span { color: var(--hz-dark-muted); font-size: 11px; }
+.metric-row strong { max-width: 150px; overflow: hidden; color: var(--hz-canvas); font-size: 11px; text-align: right; text-overflow: ellipsis; white-space: nowrap; }
+.metric-row small { grid-column: 1 / -1; color: var(--hz-muted); font-size: 10px; line-height: 1.4; }
+.preview-card h2 { margin: 0 0 8px; color: var(--hz-canvas); font-size: 17px; letter-spacing: -.03em; }
+.preview-card > p { margin: 0; color: var(--hz-dark-muted); font-size: 12px; line-height: 1.55; }
+.preview-card > p strong { color: var(--hz-canvas); }
+.preview-actions { display: grid; grid-template-columns: 1fr 1.2fr; gap: 8px; margin-top: 16px; }
+.secondary-button { min-height: 43px; padding: 10px 12px; border: 1px solid #4a5060; border-radius: 7px; background: transparent; color: var(--hz-canvas); cursor: pointer; font-size: 11px; font-weight: 700; }
+.secondary-button:hover { border-color: var(--hz-dark-muted); }.secondary-button:disabled, .audit-button:disabled { opacity: .62; cursor: wait; }
+.audit-button.compact { min-height: 43px; margin-top: 0; padding: 10px 12px; font-size: 11px; }
+.comparison { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1px; margin: 16px 0 11px; overflow: hidden; border: 1px solid #303541; border-radius: 7px; background: #303541; }
+.comparison > div { min-height: 64px; padding: 9px; background: #151820; }
+.comparison span { display: block; color: var(--hz-muted); font-size: 9px; text-transform: uppercase; letter-spacing: .06em; }
+.comparison strong { display: block; margin-top: 7px; color: var(--hz-lime); font-size: 18px; letter-spacing: -.04em; }
+.secondary-button.full { width: 100%; margin-top: 13px; }

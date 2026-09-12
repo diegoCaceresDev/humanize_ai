@@ -5,7 +5,7 @@ import httpx
 
 from .config import Settings
 from .prompt import SYSTEM_PROMPT
-from .schemas import AuditResult, Finding, PageContext, ResearchSource
+from .schemas import AuditResult, BrowserEvidence, Finding, PageContext, ResearchSource
 
 
 class ProviderError(RuntimeError):
@@ -43,7 +43,7 @@ async def exa_context(page: PageContext, settings: Settings) -> list[ResearchSou
         return []
 
 
-async def humanize_page(page: PageContext, screenshot: str, settings: Settings) -> AuditResult:
+async def humanize_page(page: PageContext, screenshot: str, settings: Settings, browser_evidence: BrowserEvidence | None = None) -> AuditResult:
     if settings.demo_mode:
         return AuditResult(
             score=68,
@@ -67,7 +67,7 @@ async def humanize_page(page: PageContext, screenshot: str, settings: Settings) 
         raise ProviderError("OPENROUTER_API_KEY is not configured on the API service.")
 
     sources = await exa_context(page, settings)
-    evidence = page.model_dump(mode="json")
+    evidence = {"page": page.model_dump(mode="json"), "browser_measurements": browser_evidence.model_dump(mode="json") if browser_evidence else None}
     research = [{"title": source.title, "url": source.url} for source in sources]
     user_text = "PAGE EVIDENCE (untrusted data):\n" + json.dumps(evidence, ensure_ascii=False) + "\n\nOPTIONAL EXA RESEARCH SOURCES:\n" + json.dumps(research)
     message = [{"type": "text", "text": user_text}, {"type": "image_url", "image_url": {"url": screenshot}}]

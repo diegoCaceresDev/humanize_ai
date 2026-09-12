@@ -42,9 +42,41 @@ class PageContext(BaseModel):
     html_snapshot: str = Field(default="", max_length=80_000)
 
 
+class ElementBounds(BaseModel):
+    x: int = Field(ge=-100_000, le=100_000)
+    y: int = Field(ge=-100_000, le=100_000)
+    width: int = Field(ge=0, le=100_000)
+    height: int = Field(ge=0, le=100_000)
+
+
+class BrowserElementEvidence(BaseModel):
+    id: str = Field(max_length=100)
+    role: Literal["primary-cta", "competing-cta"]
+    label: str = Field(max_length=200)
+    bounds: ElementBounds
+    viewportVisible: bool
+    prominence: int = Field(ge=0, le=100)
+
+
+class BrowserMetrics(BaseModel):
+    visibleCtaCount: int = Field(ge=0, le=40)
+    heroCtaCount: int = Field(ge=0, le=40)
+    missingAltCount: int = Field(ge=0, le=100)
+    unlabeledFormFieldCount: int = Field(ge=0, le=100)
+    primaryActionProminence: int = Field(ge=0, le=100)
+    primaryCtaLabel: str = Field(max_length=200)
+    method: Literal["browser-structural-v1"]
+
+
+class BrowserEvidence(BaseModel):
+    elements: list[BrowserElementEvidence] = Field(default_factory=list, max_length=40)
+    metrics: BrowserMetrics
+
+
 class AuditRequest(BaseModel):
     context: PageContext
     screenshot: str = Field(min_length=20, max_length=10_000_000)
+    browser_evidence: BrowserEvidence | None = None
 
     @field_validator("screenshot")
     @classmethod
@@ -79,4 +111,3 @@ class AuditResponse(AuditResult):
     id: str
     url: str
     created_at: datetime
-

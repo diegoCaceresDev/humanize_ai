@@ -8,7 +8,7 @@ Humanize AI is a Chrome Extension that reviews the webpage currently open in the
 
 When the user clicks the button, Humanize captures useful page evidence, sends it to the backend, asks a multimodal LLM for a grounded review, and renders the result as a branded HTML report inside the extension.
 
-The first release is intentionally read-only. It does not edit the target website, execute model-generated actions, or claim to detect AI authorship.
+The first release does not edit the target website, execute model-generated actions, or claim to detect AI authorship. It can apply a user-approved, temporary Focus Preview that uses only Humanize-owned CSS and attributes; reverting or refreshing the page removes the preview.
 
 ## 2. Target architecture
 
@@ -107,6 +107,8 @@ The result state should render:
 - Findings with severity, page evidence, and recommendations.
 - Quick wins.
 - Optional research source links returned from Exa.
+- Browser-measured CTA and accessibility signals, clearly labeled as structural evidence.
+- A temporary, user-approved Focus Preview and a before/preview metric comparison when a primary CTA is detected.
 
 ### 3.5 Branded visual system
 

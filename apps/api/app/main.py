@@ -78,7 +78,7 @@ async def create_audit(payload: AuditRequest, request: Request) -> AuditResponse
     if body_length and int(body_length) > settings.max_request_bytes:
         raise HTTPException(status_code=413, detail="This page capture is too large. Try a simpler page.")
     try:
-        result = await humanize_page(payload.context, payload.screenshot, settings)
+        result = await humanize_page(payload.context, payload.screenshot, settings, payload.browser_evidence)
     except ProviderError as exc:
         raise HTTPException(status_code=502, detail=str(exc)) from exc
     except ValueError as exc:

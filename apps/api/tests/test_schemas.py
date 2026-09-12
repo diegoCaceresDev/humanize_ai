@@ -7,12 +7,53 @@ from pydantic import ValidationError
 from app.config import Settings
 from app import main
 from app.providers import _clean_json, humanize_page
-from app.schemas import AuditRequest, PageContext
+from app.schemas import AuditRequest, AuditResult, Finding, PageContext
 
 
 def test_screenshot_must_be_an_image_data_url() -> None:
     with pytest.raises(ValidationError):
         AuditRequest.model_validate({"context": {"url": "https://example.com"}, "screenshot": "not-an-image"})
+
+
+def test_audit_request_accepts_bounded_browser_evidence() -> None:
+    request = AuditRequest.model_validate({
+        "context": {"url": "https://example.com"},
+        "screenshot": "data:image/jpeg;base64,abc",
+        "browser_evidence": {
+            "elements": [{"id": "cta-1", "role": "primary-cta", "label": "Book a demo", "bounds": {"x": 10, "y": 20, "width": 120, "height": 40}, "viewportVisible": True, "prominence": 72}],
+            "metrics": {"visibleCtaCount": 3, "heroCtaCount": 2, "missingAltCount": 1, "unlabeledFormFieldCount": 0, "primaryActionProminence": 72, "primaryCtaLabel": "Book a demo", "method": "browser-structural-v1"},
+        },
+    })
+    assert request.browser_evidence is not None
+    assert request.browser_evidence.elements[0].label == "Book a demo"
+
+
+def test_browser_evidence_rejects_unbounded_prominence() -> None:
+    with pytest.raises(ValidationError):
+        AuditRequest.model_validate({
+            "context": {"url": "https://example.com"},
+            "screenshot": "data:image/jpeg;base64,abc",
+            "browser_evidence": {"elements": [], "metrics": {"visibleCtaCount": 0, "heroCtaCount": 0, "missingAltCount": 0, "unlabeledFormFieldCount": 0, "primaryActionProminence": 101, "primaryCtaLabel": "", "method": "browser-structural-v1"}},
+        })
+
+
+def test_audit_endpoint_forwards_bounded_browser_evidence(monkeypatch: pytest.MonkeyPatch) -> None:
+    async def audit_stub(*_args, **_kwargs) -> AuditResult:
+        return AuditResult(score=80, score_label="Measured", summary="A measured response.", findings=[Finding(title="CTA competition", severity="medium", evidence="Observed 3 CTAs", recommendation="Choose one primary action.")], quick_wins=["Keep the preview reversible."])
+
+    monkeypatch.setattr(main, "engine", None)
+    monkeypatch.setattr(main, "session_factory", None)
+    monkeypatch.setattr(main, "humanize_page", audit_stub)
+    response = TestClient(main.app).post("/api/audits", json={
+        "context": {"url": "https://example.com"},
+        "screenshot": "data:image/jpeg;base64,abc",
+        "browser_evidence": {
+            "elements": [{"id": "cta-1", "role": "primary-cta", "label": "Book a demo", "bounds": {"x": 10, "y": 20, "width": 120, "height": 40}, "viewportVisible": True, "prominence": 72}],
+            "metrics": {"visibleCtaCount": 3, "heroCtaCount": 2, "missingAltCount": 1, "unlabeledFormFieldCount": 0, "primaryActionProminence": 72, "primaryCtaLabel": "Book a demo", "method": "browser-structural-v1"},
+        },
+    })
+    assert response.status_code == 200
+    assert response.json()["score"] == 80
 
 
 def test_clean_json_accepts_markdown_fences() -> None:
