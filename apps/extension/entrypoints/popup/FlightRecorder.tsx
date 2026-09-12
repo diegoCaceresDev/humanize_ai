@@ -23,6 +23,7 @@ export function FlightRecorder({ tabId, evidence, onError }: { tabId: number; ev
   const primary = evidence.elements.find((element) => element.role === "primary-cta");
   const competitors = evidence.elements.filter((element) => element.role === "competing-cta");
   const inspectable = evidence.elements.slice(0, 6);
+  const previewBlocked = evidence.ranking.ambiguousPrimary;
 
   useEffect(() => () => {
     void executeInTab<void>(tabId, revertFocusPreview);
@@ -75,11 +76,12 @@ export function FlightRecorder({ tabId, evidence, onError }: { tabId: number; ev
       <Metric label="Accessibility signals" value={evidence.metrics.missingAltCount + evidence.metrics.unlabeledFormFieldCount} detail={`${evidence.metrics.missingAltCount} missing alt · ${evidence.metrics.unlabeledFormFieldCount} unlabeled fields`} />
     </section>
     <section className="section preview-card">
-      <div className="section-heading"><span className="eyebrow">Focus Preview</span><span className="preview-status">{previewMetrics ? "Preview active" : "Reversible"}</span></div>
+      <div className="section-heading"><span className="eyebrow">Focus Preview</span><span className={`preview-status ${previewBlocked ? "blocked" : ""}`}>{previewMetrics ? "Preview active" : previewBlocked ? "Needs selection" : "Reversible"}</span></div>
       <h2>Test a clearer first action.</h2>
       <p>Humanize observed <strong>“{primary.label}”</strong> as the most prominent action. {competitors.length ? `It can temporarily soften ${Math.min(competitors.length, 5)} competing action${competitors.length === 1 ? "" : "s"}.` : "It can temporarily make this action easier to inspect."}</p>
-      {!previewMetrics && <div className="preview-actions"><button className="secondary-button" onClick={inspectionCount ? clear : inspect} disabled={busy}>{inspectionCount ? "Clear highlights" : "Inspect on page"}</button><button className="audit-button compact" onClick={preview} disabled={busy}>{busy ? "Applying…" : "Apply focus preview"}<span>→</span></button></div>}
+      {!previewMetrics && <div className="preview-actions"><button className="secondary-button" onClick={inspectionCount ? clear : inspect} disabled={busy}>{inspectionCount ? "Clear highlights" : "Inspect on page"}</button><button className="audit-button compact" onClick={preview} disabled={busy || previewBlocked}>{previewBlocked ? "Inspect candidates first" : busy ? "Applying…" : "Apply focus preview"}<span>→</span></button></div>}
       {!!inspectionCount && !previewMetrics && <p className="inspect-state"><span>Inspecting {inspectionCount} elements:</span> {inspectable.slice(0, inspectionCount).map((element) => `“${element.label}”`).join(", ")}</p>}
+      {previewBlocked && !previewMetrics && <p className="preview-warning">Humanize found two equally prominent actions. It will not choose one for you—inspect the candidates and make the decision on the page.</p>}
       {previewMetrics && <><div className="comparison"><div><span>Before</span><strong>{evidence.metrics.primaryActionProminence}</strong></div><div><span>Preview</span><strong>{previewMetrics.primaryActionProminence}</strong></div><div><span>Site mutations</span><strong>0</strong></div></div><p className="scope-note">The score is a visual prominence proxy. Humanize has not changed page content, behavior, or conversion.</p><button className="secondary-button full" onClick={revert} disabled={busy}>{busy ? "Reverting…" : "Revert preview"}</button></>}
     </section>
   </>;

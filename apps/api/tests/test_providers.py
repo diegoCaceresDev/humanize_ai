@@ -5,8 +5,8 @@ import httpx
 import pytest
 
 from app.config import Settings
-from app.providers import humanize_page
-from app.schemas import PageContext
+from app.providers import _sanitize_preview_suggestion, humanize_page
+from app.schemas import AuditResult, BrowserEvidence, Finding, PageContext, PreviewSuggestion
 
 
 class FakeResponse:
@@ -97,3 +97,10 @@ def test_exa_failure_does_not_block_openrouter(monkeypatch: pytest.MonkeyPatch) 
     assert result.score == 81
     assert result.research_sources == []
     assert any("openrouter.ai" in item["url"] for item in FakeAsyncClient.requests)
+
+
+def test_preview_suggestion_drops_unmeasured_element_ids() -> None:
+    result = AuditResult(score=80, score_label="Clear", summary="Measured.", findings=[Finding(title="CTA", severity="low", evidence="CTA", recommendation="Keep it clear.")], quick_wins=["Keep one action."], preview_suggestion=PreviewSuggestion(primaryElementId="unknown", competingElementIds=["cta-1"]))
+    evidence = BrowserEvidence.model_validate({"elements": [{"id": "cta-1", "role": "primary-cta", "label": "Book", "bounds": {"x": 0, "y": 0, "width": 80, "height": 32}, "viewportVisible": True, "prominence": 72}], "metrics": {"visibleCtaCount": 1, "heroCtaCount": 1, "missingAltCount": 0, "unlabeledFormFieldCount": 0, "primaryActionProminence": 72, "primaryCtaLabel": "Book", "method": "browser-structural-v1"}})
+    _sanitize_preview_suggestion(result, evidence)
+    assert result.preview_suggestion is None

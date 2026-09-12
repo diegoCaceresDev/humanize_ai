@@ -27,6 +27,7 @@ footer { display: flex; justify-content: space-between; color: var(--hz-muted); 
 .measured-card .section-heading, .preview-card .section-heading { margin-bottom: 10px; }
 .method-tag, .preview-status { padding: 4px 7px; border-radius: 999px; background: #29331d; color: var(--hz-lime); font-size: 9px; font-weight: 700; letter-spacing: .06em; text-transform: uppercase; }
 .preview-status { background: #2b3450; color: #d7d1ff; }
+.preview-status.blocked { background: #422522; color: #ffb0a4; }
 .metric-row { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 2px 12px; padding: 10px 0; border-top: 1px solid #303541; }
 .metric-row:first-of-type { border-top: 0; }
 .metric-row span { color: var(--hz-dark-muted); font-size: 11px; }
@@ -45,3 +46,4 @@ footer { display: flex; justify-content: space-between; color: var(--hz-muted); 
 .comparison strong { display: block; margin-top: 7px; color: var(--hz-lime); font-size: 18px; letter-spacing: -.04em; }
 .secondary-button.full { width: 100%; margin-top: 13px; }
 .inspect-state { margin-top: 11px !important; color: var(--hz-muted) !important; font-size: 10px !important; line-height: 1.45 !important; }.inspect-state span { color: var(--hz-lime); font-weight: 700; }
+.preview-warning { margin-top: 11px !important; color: #ffb0a4 !important; font-size: 10px !important; line-height: 1.45 !important; }

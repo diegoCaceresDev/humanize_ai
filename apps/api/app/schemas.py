@@ -56,6 +56,9 @@ class BrowserElementEvidence(BaseModel):
     bounds: ElementBounds
     viewportVisible: bool
     prominence: int = Field(ge=0, le=100)
+    fingerprint: str = Field(default="", max_length=64)
+    classificationReason: Literal["native-button", "button-input", "role-button", "action-link-keyword"] | None = None
+    scoreComponents: dict[str, int] = Field(default_factory=dict)
 
 
 class BrowserHeadingEvidence(BaseModel):
@@ -76,10 +79,26 @@ class BrowserMetrics(BaseModel):
     method: Literal["browser-structural-v1"]
 
 
+class BrowserRanking(BaseModel):
+    primaryCtaId: str | None = Field(default=None, max_length=100)
+    competingCtaIds: list[str] = Field(default_factory=list, max_length=40)
+    ambiguousPrimary: bool = False
+    method: Literal["cta-prominence-v1"] = "cta-prominence-v1"
+
+
+class BrowserDiagnostic(BaseModel):
+    code: str = Field(max_length=100)
+    message: str = Field(max_length=500)
+    evidenceIds: list[str] = Field(default_factory=list, max_length=40)
+
+
 class BrowserEvidence(BaseModel):
+    engineVersion: Literal["deterministic-evidence-v1"] = "deterministic-evidence-v1"
     elements: list[BrowserElementEvidence] = Field(default_factory=list, max_length=40)
     headings: list[BrowserHeadingEvidence] = Field(default_factory=list, max_length=100)
     metrics: BrowserMetrics
+    ranking: BrowserRanking = Field(default_factory=BrowserRanking)
+    diagnostics: list[BrowserDiagnostic] = Field(default_factory=list, max_length=40)
 
 
 class AuditRequest(BaseModel):
@@ -107,6 +126,11 @@ class ResearchSource(BaseModel):
     url: str = Field(max_length=2_000)
 
 
+class PreviewSuggestion(BaseModel):
+    primaryElementId: str = Field(max_length=100)
+    competingElementIds: list[str] = Field(default_factory=list, max_length=10)
+
+
 class AuditResult(BaseModel):
     score: int = Field(ge=0, le=100)
     score_label: str = Field(max_length=100)
@@ -114,6 +138,7 @@ class AuditResult(BaseModel):
     findings: list[Finding] = Field(min_length=1, max_length=12)
     quick_wins: list[str] = Field(min_length=1, max_length=12)
     research_sources: list[ResearchSource] = Field(default_factory=list, max_length=10)
+    preview_suggestion: PreviewSuggestion | None = None
 
 
 class AuditResponse(AuditResult):

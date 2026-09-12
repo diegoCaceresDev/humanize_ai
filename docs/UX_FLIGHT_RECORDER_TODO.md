@@ -20,10 +20,10 @@ For the next implementation cycle, follow the [Deterministic Evidence Engine Pla
 - [x] Add matching bounded Pydantic schemas to the API request contract.
   - [x] Reject unbounded element lists and invalid bounds.
   - [x] Keep the existing page-capture contract backward compatible during migration.
-- [ ] Update the audit prompt and `AuditResult` schema.
-  - [ ] Require citations to supplied evidence for every finding.
-  - [ ] Add optional `preview_suggestion` with a primary element ID and competing element IDs.
-  - [ ] Reject suggestions whose IDs are absent from the input evidence.
+- [x] Update the audit prompt and `AuditResult` schema.
+  - [x] Require citations to supplied evidence for every finding.
+  - [x] Add optional `preview_suggestion` with a primary element ID and competing element IDs.
+  - [x] Reject suggestions whose IDs are absent from the input evidence by dropping the optional suggestion while retaining the audit.
 - [x] Build the evidence-inspection interaction in the popup.
   - [x] “Inspect on page” highlights only referenced elements.
   - [x] “Clear highlights” removes only Humanize annotations.
@@ -40,7 +40,7 @@ For the next implementation cycle, follow the [Deterministic Evidence Engine Pla
   - [x] Label the comparison as visual/structural, not a conversion result.
 - [ ] Add tests.
   - [ ] Unit-test CTA classification and metric calculations.
-  - [ ] Unit-test API validation for evidence and preview suggestions.
+  - [x] Unit-test API validation for evidence and preview suggestions.
   - [ ] Add a manual smoke-test script for inspect → apply → compare → revert.
 
 ## P1 — Reliability and submission readiness

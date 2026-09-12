@@ -22,6 +22,9 @@ export type ElementEvidence = {
   bounds: { x: number; y: number; width: number; height: number };
   viewportVisible: boolean;
   prominence: number;
+  fingerprint: string;
+  classificationReason: "native-button" | "button-input" | "role-button" | "action-link-keyword";
+  scoreComponents: { base: number; actionVerb: number; position: number; area: number; firstViewport: number; previewState: number };
 };
 
 export type HeadingEvidence = {
@@ -43,9 +46,12 @@ export type PageMetrics = {
 };
 
 export type BrowserEvidence = {
+  engineVersion: "deterministic-evidence-v1";
   elements: ElementEvidence[];
   headings: HeadingEvidence[];
   metrics: PageMetrics;
+  ranking: { primaryCtaId: string | null; competingCtaIds: string[]; ambiguousPrimary: boolean; method: "cta-prominence-v1" };
+  diagnostics: { code: string; message: string; evidenceIds: string[] }[];
 };
 
 export type CapturedPage = {
@@ -58,6 +64,11 @@ export type CapturedPage = {
  * into the inspected page through chrome.scripting.executeScript.
  */
 export function collectPageEvidence(): CapturedPage {
+  const hash = (value: string) => {
+    let result = 2_166_136_261;
+    for (let index = 0; index < value.length; index += 1) result = Math.imul(result ^ value.charCodeAt(index), 16_777_619);
+    return `v1-${(result >>> 0).toString(16).padStart(8, "0")}`;
+  };
   const isVisible = (element: Element) => {
     const style = window.getComputedStyle(element);
     const box = element.getBoundingClientRect();
@@ -85,6 +96,12 @@ export function collectPageEvidence(): CapturedPage {
     const label = elementLabel(element).toLowerCase();
     return /\b(get started|start|try|book|demo|contact|join|sign up|signup|learn more|discover|buy|shop|download|request)\b/.test(label);
   };
+  const classificationReason = (element: Element) => {
+    if (element instanceof HTMLButtonElement) return "native-button" as const;
+    if (element instanceof HTMLInputElement) return "button-input" as const;
+    if (element.getAttribute("role") === "button") return "role-button" as const;
+    return "action-link-keyword" as const;
+  };
   const actionElements = Array.from(document.querySelectorAll("button, input[type=submit], input[type=button], [role=button], a[href]"))
     .filter(isVisible)
     .filter((element) => !(element instanceof HTMLAnchorElement) || isActionLikeLink(element))
@@ -100,18 +117,26 @@ export function collectPageEvidence(): CapturedPage {
     const heroBonus = box.top >= 0 && box.top < viewportHeight * 0.6 ? 14 : 0;
     const previewState = element.getAttribute("data-humanize-preview");
     const previewAdjustment = previewState === "primary" ? 22 : previewState === "competing" ? -18 : 0;
+    const roundedBounds = { x: Math.round(box.left), y: Math.round(box.top), width: Math.round(box.width), height: Math.round(box.height) };
+    const structuralPath = locator(element);
     return {
       id: `cta-${index + 1}`,
       label,
-      locator: locator(element),
-      bounds: { x: Math.round(box.left), y: Math.round(box.top), width: Math.round(box.width), height: Math.round(box.height) },
+      locator: structuralPath,
+      bounds: roundedBounds,
       viewportVisible: box.bottom > 0 && box.top < viewportHeight && box.right > 0 && box.left < window.innerWidth,
       prominence: Math.max(0, Math.min(100, Math.round(28 + actionVerb + topViewportBonus + sizeBonus + heroBonus + previewAdjustment))),
+      fingerprint: hash(["cta", labelLower, structuralPath, roundedBounds.x, roundedBounds.y, roundedBounds.width, roundedBounds.height].join("|")),
+      classificationReason: classificationReason(element),
+      scoreComponents: { base: 28, actionVerb, position: Math.round(topViewportBonus), area: Math.round(sizeBonus), firstViewport: heroBonus, previewState: previewAdjustment },
       inHero: box.top >= 0 && box.top < viewportHeight * 0.6,
     };
   });
   const rankedCtas = [...rawCtas].sort((a, b) => b.prominence - a.prominence || a.bounds.y - b.bounds.y);
   const primaryId = rankedCtas[0]?.id || "";
+  const [firstRanked, secondRanked] = rankedCtas;
+  const primaryDifference = firstRanked && secondRanked ? firstRanked.prominence - secondRanked.prominence : Infinity;
+  const ambiguousPrimary = primaryDifference < 5;
   const elements = rawCtas.map(({ inHero: _inHero, ...cta }) => ({ ...cta, role: cta.id === primaryId ? "primary-cta" as const : "competing-cta" as const }));
   const primary = elements.find((element) => element.id === primaryId);
   const root = document.querySelector("main") || document.body;
@@ -168,6 +193,7 @@ export function collectPageEvidence(): CapturedPage {
       html_snapshot: snapshot.outerHTML.slice(0, 80_000),
     },
     evidence: {
+      engineVersion: "deterministic-evidence-v1",
       elements,
       headings: headingEvidence,
       metrics: {
@@ -179,6 +205,8 @@ export function collectPageEvidence(): CapturedPage {
         primaryCtaLabel: primary?.label || "No primary action detected",
         method: "browser-structural-v1",
       },
+      ranking: { primaryCtaId: primaryId || null, competingCtaIds: elements.filter((element) => element.id !== primaryId).map((element) => element.id), ambiguousPrimary, method: "cta-prominence-v1" },
+      diagnostics: ambiguousPrimary && firstRanked && secondRanked ? [{ code: "ambiguous-primary-cta", message: "The top two CTA candidates are within five prominence points. Inspect them before choosing a preview target.", evidenceIds: [firstRanked.id, secondRanked.id] }] : [],
     },
   };
 }

@@ -23,6 +23,18 @@ def _clean_json(raw: str) -> dict[str, Any]:
         raise ProviderError("The model returned an invalid audit format.") from exc
 
 
+def _sanitize_preview_suggestion(result: AuditResult, browser_evidence: BrowserEvidence | None) -> None:
+    """Optional model references are annotations, never browser instructions."""
+    suggestion = result.preview_suggestion
+    if suggestion is None:
+        return
+    allowed_ids = {element.id for element in browser_evidence.elements} if browser_evidence else set()
+    if suggestion.primaryElementId not in allowed_ids:
+        result.preview_suggestion = None
+        return
+    suggestion.competingElementIds = [element_id for element_id in suggestion.competingElementIds if element_id in allowed_ids and element_id != suggestion.primaryElementId]
+
+
 async def exa_context(page: PageContext, settings: Settings) -> list[ResearchSource]:
     if not settings.exa_enabled or not settings.exa_api_key:
         return []
@@ -93,6 +105,7 @@ async def humanize_page(page: PageContext, screenshot: str, settings: Settings, 
     if not isinstance(raw, str):
         raise ProviderError("The model returned an invalid audit format.")
     result = AuditResult.model_validate(_clean_json(raw))
+    _sanitize_preview_suggestion(result, browser_evidence)
     if sources:
         result.research_sources = sources
     return result

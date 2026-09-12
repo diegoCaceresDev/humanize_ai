@@ -53,11 +53,29 @@ export function applyFocusPreview(primary: ElementEvidence, competitors: Element
     const visibleLabel = element instanceof HTMLInputElement ? element.value || element.getAttribute("aria-label") || "" : element.textContent || element.getAttribute("aria-label") || "";
     return visibleLabel.replace(/\s+/g, " ").trim().includes(label.slice(0, 32));
   };
+  const locator = (element: Element) => {
+    const parts: string[] = [];
+    let current: Element | null = element;
+    while (current && current !== document.body && parts.length < 7) {
+      const tag = current.tagName.toLowerCase();
+      const siblings = current.parentElement ? Array.from(current.parentElement.children).filter((child) => child.tagName === current!.tagName) : [];
+      parts.unshift(`${tag}:nth-of-type(${Math.max(1, siblings.indexOf(current) + 1)})`);
+      current = current.parentElement;
+    }
+    return `body > ${parts.join(" > ")}`;
+  };
+  const fingerprint = (element: Element, label: string) => {
+    const box = element.getBoundingClientRect();
+    const source = ["cta", label.toLowerCase(), locator(element), Math.round(box.left), Math.round(box.top), Math.round(box.width), Math.round(box.height)].join("|");
+    let result = 2_166_136_261;
+    for (let index = 0; index < source.length; index += 1) result = Math.imul(result ^ source.charCodeAt(index), 16_777_619);
+    return `v1-${(result >>> 0).toString(16).padStart(8, "0")}`;
+  };
   let primaryFound = false;
   const mark = (evidence: ElementEvidence, state: "primary" | "competing") => {
     try {
       const element = document.querySelector(evidence.locator);
-      if (!element || !matchesEvidence(element, evidence.label)) return false;
+      if (!element || !matchesEvidence(element, evidence.label) || (evidence.fingerprint && fingerprint(element, evidence.label) !== evidence.fingerprint)) return false;
       element.setAttribute("data-humanize-preview", state);
       return true;
     } catch {

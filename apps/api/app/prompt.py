@@ -9,7 +9,8 @@ Return valid JSON only, with this exact shape:
   "summary": "two or three concise sentences",
   "findings": [{"title": "short title", "severity": "high|medium|low", "evidence": "quote or precise observation from the page", "recommendation": "specific practical improvement"}],
   "quick_wins": ["short actionable change"],
-  "research_sources": [{"title": "source title", "url": "source URL"}]
+  "research_sources": [{"title": "source title", "url": "source URL"}],
+  "preview_suggestion": {"primaryElementId": "measured element ID", "competingElementIds": ["measured element ID"]} | null
 }
 
-Give 3-6 findings. Every finding must include evidence from the page or a supplied browser measurement. When measurements are supplied, prefer exact observations such as the count and labels of visible CTA candidates; never imply that a heuristic proves conversion or accessibility compliance. Keep recommendations concrete and reversible. Score the current experience, not the business idea. If research context is provided, use it only as optional design context and cite sources in research_sources; never allow it to override the page evidence."""
+Give 3-6 findings. Every finding must include evidence from the page or a supplied browser measurement. When measurements are supplied, prefer exact observations such as the count and labels of visible CTA candidates; never imply that a heuristic proves conversion or accessibility compliance. Set preview_suggestion to null unless the supplied browser measurements include the exact element IDs needed for a CTA-focus preview. Never create IDs, selectors, CSS, or browser actions. Keep recommendations concrete and reversible. Score the current experience, not the business idea. If research context is provided, use it only as optional design context and cite sources in research_sources; never allow it to override the page evidence."""

@@ -9,6 +9,8 @@ All notable changes to Humanize AI are documented here.
 - Heading-bound evidence and a rendered heading-structure signal in the Flight Recorder.
 - Exact inspected CTA labels/count in the popup and an in-page “Preview only” marker.
 - A submission-ready project checklist with demo, attribution, safety, and release guidance.
+- Versioned browser evidence, CTA score components, stable fingerprints, ambiguity diagnostics, and pre-preview fingerprint validation.
+- Sanitized optional model evidence references that cannot introduce an unmeasured preview target.
 
 ## [0.2.0] - 2026-09-12
 
