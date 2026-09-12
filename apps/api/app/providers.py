@@ -5,7 +5,7 @@ import httpx
 
 from .config import Settings
 from .prompt import SYSTEM_PROMPT
-from .schemas import AuditResult, PageContext, ResearchSource
+from .schemas import AuditResult, Finding, PageContext, ResearchSource
 
 
 class ProviderError(RuntimeError):
@@ -44,6 +44,25 @@ async def exa_context(page: PageContext, settings: Settings) -> list[ResearchSou
 
 
 async def humanize_page(page: PageContext, screenshot: str, settings: Settings) -> AuditResult:
+    if settings.demo_mode:
+        return AuditResult(
+            score=68,
+            score_label="A promising first impression",
+            summary=f"{page.title or 'This page'} has a usable foundation, but a few moments still feel generic. The biggest opportunity is to make the first screen more specific and more obviously useful to the right person.",
+            findings=[
+                Finding(
+                    title="The first impression could be more specific",
+                    severity="medium",
+                    evidence=page.headings[0].text if page.headings else "No visible heading was captured",
+                    recommendation="Rewrite the opening promise around a concrete audience and outcome.",
+                ),
+            ],
+            quick_wins=[
+                "Replace the broadest headline with a specific outcome for a specific audience.",
+                "Give the primary CTA a more concrete verb and expected next step.",
+                "Add descriptive alt text to the most important image.",
+            ],
+        )
     if not settings.openrouter_api_key:
         raise ProviderError("OPENROUTER_API_KEY is not configured on the API service.")
 
@@ -71,8 +90,9 @@ async def humanize_page(page: PageContext, screenshot: str, settings: Settings) 
     except (httpx.HTTPError, KeyError, IndexError, TypeError, ValueError) as exc:
         raise ProviderError("OpenRouter could not complete this audit.") from exc
 
+    if not isinstance(raw, str):
+        raise ProviderError("The model returned an invalid audit format.")
     result = AuditResult.model_validate(_clean_json(raw))
-    if not result.research_sources and sources:
+    if sources:
         result.research_sources = sources
     return result
-

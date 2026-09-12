@@ -47,6 +47,8 @@ cp .env.example .env
 uvicorn app.main:app --reload --port 8000
 ```
 
+For a no-credentials smoke test, set `DEMO_MODE=true` in `apps/api/.env`. This returns a deterministic sample report while preserving the real extension-to-API flow. A deliberately generic test landing page is included in `apps/demo`; serve it with `npm run dev:demo` and open `http://localhost:4173` in Chrome.
+
 Build the extension:
 
 ```bash
@@ -56,6 +58,8 @@ npm run build:extension
 ```
 
 In Chrome, open `chrome://extensions`, enable **Developer mode**, select **Load unpacked**, and choose the generated `apps/extension/.output/chrome-mv3` directory. Click the Humanize AI toolbar icon, then **Humanize this page**.
+
+The extension captures the visible viewport as a screenshot and sends bounded text/structure plus image metadata. It does not upload original image binaries in this first version.
 
 ### Deploying the API on Render
 
