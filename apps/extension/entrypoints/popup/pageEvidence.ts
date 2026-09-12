@@ -64,6 +64,9 @@ export type CapturedPage = {
  * into the inspected page through chrome.scripting.executeScript.
  */
 export function collectPageEvidence(): CapturedPage {
+  // Keep every extracted field within the API contract. Pages can legally
+  // contain exceptionally long URLs, accessible names, and form values.
+  const clip = (value: string | null | undefined, maximum: number) => (value || "").slice(0, maximum);
   const hash = (value: string) => {
     let result = 2_166_136_261;
     for (let index = 0; index < value.length; index += 1) result = Math.imul(result ^ value.charCodeAt(index), 16_777_619);
@@ -181,14 +184,14 @@ export function collectPageEvidence(): CapturedPage {
   return {
     context: {
       url: location.href,
-      title: document.title,
-      description: document.querySelector('meta[name="description"]')?.getAttribute("content") || "",
-      language: document.documentElement.lang || "",
+      title: clip(document.title, 1_000),
+      description: clip(document.querySelector('meta[name="description"]')?.getAttribute("content"), 3_000),
+      language: clip(document.documentElement.lang, 20),
       headings,
       calls_to_action: rawCtas.map((cta) => cta.label),
-      forms,
-      images,
-      links,
+      forms: forms.map((form) => ({ action: clip(form.action, 2_000), fields: form.fields.map((field) => clip(field, 500)) })),
+      images: images.map((image) => ({ ...image, src: clip(image.src, 2_000), alt: clip(image.alt, 500) })),
+      links: links.map((link) => ({ text: clip(link.text, 500), href: clip(link.href, 2_000) })),
       visible_text: (root.innerText || "").replace(/\s+/g, " ").trim().slice(0, 50_000),
       html_snapshot: snapshot.outerHTML.slice(0, 80_000),
     },

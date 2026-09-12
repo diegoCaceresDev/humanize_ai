@@ -35,6 +35,11 @@ type PageContext = {
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || "http://localhost:8000";
 
+type ApiValidationIssue = {
+  loc?: unknown;
+  msg?: unknown;
+};
+
 function browserEvidenceForApi(evidence: BrowserEvidence) {
   return {
     metrics: evidence.metrics,
@@ -49,6 +54,22 @@ function readableError(caught: unknown): string {
     return `Can’t reach the Humanize API at ${API_BASE_URL}. Check that the service is live and rebuild the extension with the correct VITE_API_BASE_URL.`;
   }
   return message;
+}
+
+function responseError(status: number, payload: unknown): string {
+  const detail = typeof payload === "object" && payload !== null && "detail" in payload
+    ? (payload as { detail?: unknown }).detail
+    : undefined;
+  if (typeof detail === "string") return detail;
+  if (Array.isArray(detail)) {
+    const issues = detail.slice(0, 2).map((issue: ApiValidationIssue) => {
+      const location = Array.isArray(issue.loc) ? issue.loc.filter((part) => part !== "body").join(".") : "page capture";
+      const message = typeof issue.msg === "string" ? issue.msg : "is invalid";
+      return `${location}: ${message}`;
+    }).filter(Boolean);
+    if (issues.length) return `The page capture needs adjustment (${issues.join("; ")}). Please try again.`;
+  }
+  return `The audit service could not review this page (HTTP ${status}). Please try again.`;
 }
 
 function collectPageContext(): PageContext {
@@ -148,11 +169,11 @@ export default function App() {
     try {
       const captured = await captureCurrentPage();
       const response = await fetch(`${API_BASE_URL}/api/audits`, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ context: captured.context, screenshot: captured.screenshot, browser_evidence: browserEvidenceForApi(captured.evidence) }) });
-      const payload = await response.json().catch(() => ({}));
-      if (!response.ok) throw new Error(payload.detail || "The audit service could not review this page.");
+      const payload: unknown = await response.json().catch(() => ({}));
+      if (!response.ok) throw new Error(responseError(response.status, payload));
       setEvidence(captured.evidence);
       setTabId(captured.tabId);
-      setResult(payload);
+      setResult(payload as AuditResult);
     } catch (caught) {
       setError(readableError(caught));
     } finally { setLoading(false); }
