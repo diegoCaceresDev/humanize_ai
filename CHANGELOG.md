@@ -4,6 +4,25 @@ All notable changes to Humanize AI are documented here.
 
 ## [Unreleased]
 
+## [0.2.2] - 2026-09-12
+
+### Added
+
+- A production-quality project README with verified cloud-audit screenshots and descriptions of the score, findings, actions, Exa context, and browser evidence experience.
+- A controlled team-cloud configuration template pointing to the deployed Render API.
+- A complete `v0.2.2` test, setup, cloud, and release-documentation handoff.
+
+### Fixed
+
+- Captured page metadata is bounded to the API contract before submission, preventing unusually long public-page fields from failing validation.
+- Structured FastAPI validation responses now render as useful popup messages instead of `[object Object]`.
+
+## [0.2.1] - 2026-09-12
+
+### Fixed
+
+- Published the Chrome extension validation and readable-error fix as a standalone patch release.
+
 ### Added
 
 - Heading-bound evidence and a rendered heading-structure signal in the Flight Recorder.

@@ -1,6 +1,6 @@
 # Team setup and local test guide
 
-This guide takes a teammate from a fresh clone to a complete local Humanize workflow. It is written for release `v0.2.0`.
+This guide takes a teammate from a fresh clone to a complete local or controlled-cloud Humanize workflow. It is written for release `v0.2.2`.
 
 ## Prerequisites
 
@@ -17,7 +17,7 @@ Do not send `.env` files in chat or commit them. Request access through the team
 ```bash
 git clone https://github.com/diegoCaceresDev/humanize_ai.git
 cd humanize_ai
-git checkout v0.2.0
+git checkout v0.2.2
 npm ci
 python3 -m venv .venv
 source .venv/bin/activate
@@ -67,7 +67,7 @@ npm run package:extension
 The package command creates:
 
 - `apps/extension/.output/chrome-mv3/` — choose this directory in Chrome’s **Load unpacked** flow.
-- `apps/extension/.output/extension-0.2.0-chrome.zip` — the versioned release artifact for archive or distribution.
+- `apps/extension/.output/extension-0.2.2-chrome.zip` — the versioned release artifact for archive or distribution.
 
 ## 4. Run the local services
 
@@ -92,6 +92,17 @@ curl http://localhost:8000/readyz
 ```
 
 Expected live responses are `{"status":"ok"}` and `{"status":"ready","database":"connected"}`.
+
+## Optional: use the shared cloud API
+
+To test the deployed API rather than a local FastAPI process, copy `apps/extension/.env.cloud.example` to `apps/extension/.env.production`, then run `npm run package:extension`. Reload the extension from `apps/extension/.output/chrome-mv3`.
+
+The cloud package contains only the public Render URL. It never contains provider or database credentials. Check the service before testing:
+
+```bash
+curl https://humanize-api-t9g3.onrender.com/healthz
+curl https://humanize-api-t9g3.onrender.com/readyz
+```
 
 ## 5. Install and test in Chrome
 

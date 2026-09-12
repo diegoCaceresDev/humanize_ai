@@ -1,6 +1,6 @@
 # Final user test
 
-Humanize `v0.2.0` is ready for a full local Chrome workflow using Neon, OpenRouter, and optional Exa credentials. For a fresh clone, complete [team setup](TEAM_SETUP.md) first.
+Humanize `v0.2.2` is ready for a full local or controlled-cloud Chrome workflow using Neon, OpenRouter, and optional Exa credentials. For a fresh clone, complete [team setup](TEAM_SETUP.md) first.
 
 ## 1. Start the API
 
@@ -53,7 +53,7 @@ In Chrome:
 4. Choose `apps/extension/.output/chrome-mv3`.
 5. Pin **Humanize AI** to the toolbar if Chrome does not show it immediately.
 
-The generated ZIP at `apps/extension/.output/extension-0.2.0-chrome.zip` is useful for sharing the build, but **Load unpacked** is the developer-install path for this MVP.
+The generated ZIP at `apps/extension/.output/extension-0.2.2-chrome.zip` is useful for sharing the build, but **Load unpacked** is the developer-install path for this MVP.
 
 ## 4. Run the audit
 
@@ -63,6 +63,8 @@ The generated ZIP at `apps/extension/.output/extension-0.2.0-chrome.zip` is usef
 4. Wait for the report to render.
 
 The report should include a Humanity Score, a summary, evidence-backed findings, quick wins, browser-measured evidence, and Exa research links when available.
+
+For a controlled-cloud test, build with `apps/extension/.env.production` copied from `.env.cloud.example`, reload the extension, and use the Render URL documented in [Cloud deployment](CLOUD_TEST_DEPLOYMENT.md). The results shown in the README screenshots were produced through this end-to-end route.
 
 ## 5. Verify Focus Preview
 

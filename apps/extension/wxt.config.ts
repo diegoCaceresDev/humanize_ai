@@ -5,7 +5,7 @@ export default defineConfig({
   manifest: {
     name: "Humanize AI",
     description: "Turn any open webpage into a grounded UX review.",
-    version: "0.2.1",
+    version: "0.2.2",
     permissions: ["activeTab", "scripting", "storage"],
     host_permissions: [
       "http://localhost:8000/*",

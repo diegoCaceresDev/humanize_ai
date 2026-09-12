@@ -26,7 +26,7 @@ async def lifespan(_: FastAPI):
         await engine.dispose()
 
 
-app = FastAPI(title="Humanize API", version="0.2.0", lifespan=lifespan)
+app = FastAPI(title="Humanize API", version="0.2.2", lifespan=lifespan)
 cors_options: dict[str, object] = {
     "allow_origins": settings.origins,
     "allow_credentials": False,

@@ -1,145 +1,155 @@
-# Humanize
+# Humanize AI
 
-> An evidence-first UX review agent for the page currently open in Chrome.
+> An evidence-first UX review for the page currently open in Chrome.
 
-Humanize helps developers, founders, and designers turn vague feedback into grounded, actionable UX improvements. From the extension popup, a reviewer deliberately audits the active page. Humanize captures bounded page evidence and the visible viewport, sends that evidence to the API, and returns a branded report with a Humanity Score, findings, and practical next steps.
+[![Release](https://img.shields.io/github/v/release/diegoCaceresDev/humanize_ai?display_name=tag&label=release)](https://github.com/diegoCaceresDev/humanize_ai/releases/latest)
+[![Chrome MV3](https://img.shields.io/badge/Chrome-Manifest%20V3-4285F4?logo=googlechrome&logoColor=white)](https://developer.chrome.com/docs/extensions/develop/migrate/what-is-mv3)
+[![FastAPI](https://img.shields.io/badge/API-FastAPI-009688?logo=fastapi&logoColor=white)](https://fastapi.tiangolo.com/)
+[![Postgres](https://img.shields.io/badge/Data-Neon%20Postgres-00E699?logo=postgresql&logoColor=white)](https://neon.com/)
 
-Humanize is **not** an AI-authorship detector. It reviews the human quality of a live interface.
+Humanize turns a live web page into a calm, evidence-backed UX review. A reviewer explicitly starts an audit from the Chrome extension; Humanize captures a bounded representation of the active tab, asks the configured model for a structured assessment, and returns a branded report with concrete findings, quick wins, research context, and browser-measured signals.
 
-## What works today
+It is a UX-review tool—not an AI-authorship detector, site editor, or autonomous agent.
 
-- Chrome Manifest V3 extension built with WXT, React, and TypeScript.
-- One-click audit of a normal HTTP(S) page from the extension popup.
-- Active-tab capture: visible JPEG screenshot plus bounded text, structure, CTA, form, link, and image metadata.
-- FastAPI service that produces structured report data.
-- OpenRouter model integration; the provider key remains server-side.
-- Optional Exa research grounding.
-- Neon Postgres persistence with Alembic migrations.
-- Local demo site, GitHub Actions workflow, and Render deployment blueprint.
-- Signal Violet interface with a Humanity Score, findings, evidence, recommendations, and quick wins.
-- Browser-native UX Flight Recorder: measured CTA/accessibility signals, element inspection, and a user-approved Focus Preview with a clean revert path.
+![Completed Humanize audit of the AI Tinkerers homepage, with the report open beside the audited page.](docs/assets/screenshots/ai-tinkerers-audit-overview.png)
 
-> **Current MVP boundary:** Humanize can apply a temporary Focus Preview that only adds Humanize-owned styling to the current tab. It never changes site content, behavior, or persisted styles; the user can revert it and a page refresh clears it. PDF export and persistent multi-audit comparisons are not included.
+## What is included in v0.2.2
+
+- **One-click Chrome audit.** A Manifest V3 extension audits the active HTTP(S) tab only after a reviewer chooses to do so.
+- **Bounded, evidence-first capture.** The extension sends a visible JPEG screenshot plus bounded text, headings, links, forms, images, CTA candidates, and accessibility signals. Original image files are never uploaded.
+- **Structured AI report.** FastAPI calls OpenRouter server-side and returns a Humanity Score, findings, recommendations, and quick wins.
+- **Research grounding.** Exa can add public, relevant sources without blocking the core audit when unavailable.
+- **Persistent audit history.** Neon Postgres stores successful audit reports; Alembic manages schema setup.
+- **UX Flight Recorder.** The popup shows measured CTA, heading, and accessibility signals from the inspected page.
+- **Reversible Focus Preview.** A reviewer may temporarily emphasize the measured primary action and soften competing actions. Humanize adds only its own temporary styling; reverting or refreshing removes it.
+
+## Verified experience
+
+The screenshots below show a completed cloud-backed audit of the public AI Tinkerers homepage. They demonstrate the actual review flow, not a design mockup.
+
+| View | What it demonstrates |
+| --- | --- |
+| [Audit overview](docs/assets/screenshots/ai-tinkerers-audit-overview.png) | The popup report opens beside the active site with a 75/100 Humanity Score, model summary, and browser-evidence card. |
+| [Findings](docs/assets/screenshots/ai-tinkerers-audit-findings.png) | Severity-tagged, evidence-backed findings identify CTA overload, missing image alt text, and an unclear primary action. |
+| [Quick wins and context](docs/assets/screenshots/ai-tinkerers-audit-actions-and-context.png) | The report turns findings into concise actions and attaches related public sources discovered through Exa. |
+| [Evidence detail](docs/assets/screenshots/ai-tinkerers-audit-evidence-detail.png) | A focused view of the score and deterministic page measurements: visible CTAs, first-viewport CTAs, primary action, and heading structure. |
+
+### Audit overview
+
+![AI Tinkerers homepage with Humanize score, summary, and browser evidence open in Chrome.](docs/assets/screenshots/ai-tinkerers-audit-overview.png)
+
+### Findings, recommendations, and research context
+
+![Humanize findings panel for the AI Tinkerers audit.](docs/assets/screenshots/ai-tinkerers-audit-findings.png)
+
+![Humanize quick wins and Exa-powered context panel for the AI Tinkerers audit.](docs/assets/screenshots/ai-tinkerers-audit-actions-and-context.png)
+
+### Browser evidence
+
+![Close-up of Humanize score and measured browser evidence.](docs/assets/screenshots/ai-tinkerers-audit-evidence-detail.png)
 
 ## Architecture
 
-```
+```text
 Active Chrome tab
   → Humanize extension popup
-  → FastAPI audit service
-  → optional Exa context + OpenRouter model
-  → Neon Postgres
-  → structured report in the popup
+  → FastAPI audit service on Render
+  → OpenRouter model + optional Exa research
+  → Neon Postgres audit record
+  → structured report and reversible browser evidence tools
 ```
 
-The extension transmits the **visible screenshot** and the bounded page evidence required for the audit to the configured API. It does not upload original image binaries.
+The extension has no OpenRouter, Exa, Render, or Neon secret. Provider and database credentials remain server-side.
 
-## Quick start (Windows PowerShell)
+## Install and test
 
-Requirements: Node.js 22 or later, Python 3.12 or later, and Chrome.
+### Use the release
 
-```powershell
-# From the repository root
-npm ci
-Copy-Item .env.example .env
-Copy-Item apps/extension/.env.example apps/extension/.env
+1. Download or clone [v0.2.2](https://github.com/diegoCaceresDev/humanize_ai/releases/tag/v0.2.2).
+2. Run `npm ci` from the repository root.
+3. Build the extension:
 
-# API environment
-cd apps/api
-py -3.12 -m venv .venv
-.\.venv\Scripts\Activate.ps1
-pip install -r requirements.txt
-cd ../..
-```
+   ```bash
+   npm run package:extension
+   ```
 
-For a provider-free end-to-end UI smoke test, set `DEMO_MODE=true` in the root `.env`. For a live model audit, configure `OPENROUTER_API_KEY`; Exa is optional. Configure the database variables when using persistence and migrations.
+4. In Chrome, open `chrome://extensions`, enable **Developer mode**, choose **Load unpacked**, and select `apps/extension/.output/chrome-mv3`.
+5. Pin **Humanize AI**, open a normal HTTP(S) page, choose the Humanize icon, and select **Humanize this page**.
 
-Start the services in separate terminals:
+The generated ZIP is a release artifact. Chrome’s developer workflow loads the unpacked `chrome-mv3` directory.
 
-```powershell
-# Terminal 1 — from the repository root, with the API virtual environment activated
-npm run dev:api
+### Run against the shared cloud test API
 
-# Terminal 2 — repository root
-npm run dev:demo
-```
+The controlled team test service is available at `https://humanize-api-t9g3.onrender.com`.
 
-Build and load the extension:
+1. Copy `apps/extension/.env.cloud.example` to `apps/extension/.env.production`.
+2. Confirm the file contains only the public `VITE_API_BASE_URL` value.
+3. Run `npm run package:extension` and reload the extension from `apps/extension/.output/chrome-mv3`.
+4. Confirm the service before auditing:
 
-```powershell
-# Repository root
-npm run build:extension
-```
+   ```bash
+   curl https://humanize-api-t9g3.onrender.com/healthz
+   curl https://humanize-api-t9g3.onrender.com/readyz
+   ```
 
-1. Open `chrome://extensions`.
-2. Enable **Developer mode**.
-3. Choose **Load unpacked** and select `apps/extension/.output/chrome-mv3`.
-4. Open `http://localhost:4173`, pin Humanize, and choose **Humanize this page**.
+For local development, follow [Team setup](docs/TEAM_SETUP.md). The complete user test is documented in [Final test](docs/FINAL_TEST.md).
 
-To create the release ZIP, run `npm run package:extension`. Chrome Developer Mode loads the unpacked `chrome-mv3` folder, not the ZIP.
+## Configuration and safety
 
-## Configuration
-
-Copy the templates; never commit populated `.env` files.
-
-| Purpose | Variables |
+| Concern | Where it belongs |
 | --- | --- |
-| Demo mode | `DEMO_MODE=true` |
-| Live model audit | `OPENROUTER_API_KEY`, optional `OPENROUTER_MODEL` |
-| Optional web grounding | `EXA_API_KEY`, `EXA_ENABLED=true` |
-| Database | `DATABASE_URL`, `NEON_DATABASE_URL`, or `NEON_URL` |
-| Extension API URL | `apps/extension/.env` → `VITE_API_BASE_URL` |
+| Public extension API URL | `apps/extension/.env` or `.env.production` as `VITE_API_BASE_URL` |
+| OpenRouter credential | Server-side `OPENROUTER_API_KEY` |
+| Optional Exa credential | Server-side `EXA_API_KEY` with `EXA_ENABLED=true` |
+| Neon connection URLs | Server-side `DATABASE_URL` and `DATABASE_URL_UNPOOLED` |
+| Chrome extension CORS policy | Render `ALLOWED_ORIGINS`; lock to known extension IDs before a public launch |
 
-The extension defaults to `http://localhost:8000`. For a deployed API, set `VITE_API_BASE_URL` before building the extension.
+- Audits begin only after an explicit click.
+- Treat every captured page as untrusted input; Humanize never follows instructions embedded in page content.
+- Do not audit private, confidential, or sensitive pages during team testing.
+- The report is advisory. Browser measurements are structural/visual proxies, not proof of conversion, accessibility compliance, or usability outcomes.
+- Focus Preview does not edit the target site, save changes, or alter target-site behavior.
 
-## Verification
+## Development and verification
 
-Run these from the repository root after installing dependencies. Activate the API virtual environment before the API test command.
+Requirements: Node.js 22+, Python 3.12+, and Google Chrome.
 
-```powershell
+```bash
+npm ci
+python3 -m venv .venv
+source .venv/bin/activate
+pip install -r apps/api/requirements.txt
+cp .env.example .env
+cp apps/extension/.env.example apps/extension/.env
+
+npm run migrate:api
 npm run verify
 npm run test:api
-npm run build:extension
+npm run package:extension
 ```
 
-The source tree includes tests and CI configuration. A local passing run and a Chrome audit against the demo page are still required before recording the final demo.
+Run the API with `npm run dev:api` and the local demonstration page with `npm run dev:demo`.
 
-## Privacy and scope
+## Repository map
 
-- Audits only run after an explicit reviewer action.
-- The OpenRouter key is server-side and is never bundled into the extension.
-- The screenshot and bounded page evidence leave the browser for the configured API; do not audit private, confidential, or sensitive pages during the demo.
-- Captured content is untrusted evidence, never instructions for the agent.
-- The report is advisory: the reviewer decides what to change.
-- Focus Preview is an observable visual/structural comparison, not proof of conversion, usability, or accessibility compliance.
-
-## Project structure
-
+```text
+apps/extension/  Chrome MV3 extension (WXT, React, TypeScript)
+apps/api/        FastAPI API, OpenRouter/Exa providers, SQLAlchemy, Alembic
+apps/demo/       Local page for predictable audits
+docs/            Team, cloud, test, design, and release documentation
+render.yaml      Render deployment blueprint
 ```
-apps/
-  extension/  # WXT + React Chrome extension
-  api/        # FastAPI audit service, integrations, migrations, tests
-  demo/       # local page used for the end-to-end demo
-docs/         # team plan, design system, test and release notes
-render.yaml   # Render deployment blueprint
-```
-
-## Hackathon declaration
-
-**Built during the hackathon:** the Humanize UX-review concept, WXT extension, active-tab evidence capture, FastAPI audit pipeline, OpenRouter/Exa/Neon integrations, review experience, demo page, tests, documentation, and Signal Violet design system.
-
-**Inherited or third-party:** the event rules and reference material, open-source frameworks and packages (WXT, React, FastAPI, SQLAlchemy, Alembic), Chrome APIs, and the external OpenRouter, Exa, Neon, and Render services. The current application runtime is not a CopilotKit/Next.js starter implementation.
 
 ## Documentation
 
-- [Team setup and test guide](docs/TEAM_SETUP.md)
-- [Final user workflow](docs/FINAL_TEST.md)
-- [Implementation plan](docs/IMPLEMENTATION_PLAN.md)
-- [Team ownership and acceptance criteria](docs/TEAM_PLAN.md)
-- [Humanize design system](docs/HUMANIZE_DESIGN_SYSTEM.md)
+- [Team setup](docs/TEAM_SETUP.md)
+- [Cloud deployment and team test](docs/CLOUD_TEST_DEPLOYMENT.md)
+- [Final user test](docs/FINAL_TEST.md)
+- [v0.2.2 release notes](docs/RELEASE_NOTES_v0.2.2.md)
 - [UX Flight Recorder plan](docs/UX_FLIGHT_RECORDER_PLAN.md)
-- [Deterministic Evidence Engine plan](docs/DETERMINISTIC_EVIDENCE_PLAN.md)
-- [Submission checklist](SUBMISSION.md)
-- [Release notes](docs/RELEASE_NOTES_v0.2.0.md)
-- [Cloud test deployment](docs/CLOUD_TEST_DEPLOYMENT.md)
+- [Design system](docs/HUMANIZE_DESIGN_SYSTEM.md)
 - [Changelog](CHANGELOG.md)
+
+## Built during the hackathon
+
+Humanize’s concept, extension, active-tab evidence capture, FastAPI pipeline, OpenRouter/Exa/Neon integration, Signal Violet interface, evidence tools, demo, documentation, and deployment workflow were built during the hackathon. It uses established open-source frameworks and external cloud providers; their services and APIs remain the property of their respective owners.
