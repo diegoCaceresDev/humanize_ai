@@ -4,6 +4,7 @@ from uuid import UUID, uuid4
 
 from fastapi import FastAPI, HTTPException, Request
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import JSONResponse
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import async_sessionmaker, create_async_engine
 
@@ -29,6 +30,19 @@ async def lifespan(_: FastAPI):
 
 app = FastAPI(title="Humanize API", version="0.1.0", lifespan=lifespan)
 app.add_middleware(CORSMiddleware, allow_origins=settings.origins, allow_origin_regex=r"chrome-extension://.*", allow_credentials=False, allow_methods=["GET", "POST"], allow_headers=["*"])
+
+
+@app.middleware("http")
+async def reject_oversized_audits(request: Request, call_next):
+    body_length = request.headers.get("content-length")
+    if request.url.path == "/api/audits" and request.method == "POST" and body_length:
+        try:
+            too_large = int(body_length) > settings.max_request_bytes
+        except ValueError:
+            too_large = False
+        if too_large:
+            return JSONResponse(status_code=413, content={"detail": "This page capture is too large. Try a simpler page."})
+    return await call_next(request)
 
 
 @app.get("/healthz")

@@ -45,3 +45,9 @@ def test_history_endpoint_explains_missing_database(monkeypatch: pytest.MonkeyPa
     monkeypatch.setattr(main, "session_factory", None)
     response = TestClient(main.app).get("/api/audits/00000000-0000-0000-0000-000000000000")
     assert response.status_code == 503
+
+
+def test_audit_payload_is_rejected_before_parsing_when_oversized(monkeypatch: pytest.MonkeyPatch) -> None:
+    monkeypatch.setattr(main.settings, "max_request_bytes", 10)
+    response = TestClient(main.app).post("/api/audits", content=b"01234567890", headers={"content-type": "application/json"})
+    assert response.status_code == 413

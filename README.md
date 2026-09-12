@@ -49,6 +49,8 @@ uvicorn app.main:app --reload --port 8000
 
 For a no-credentials smoke test, set `DEMO_MODE=true` in `apps/api/.env`. This returns a deterministic sample report while preserving the real extension-to-API flow. A deliberately generic test landing page is included in `apps/demo`; serve it with `npm run dev:demo` and open `http://localhost:4173` in Chrome.
 
+There is also a root [.env.example](/Users/jpino/Development/humanize/.env.example) if you prefer keeping one shared local configuration file. The API accepts both the canonical provider variable names and the existing `OPEN_ROUTER`, `EXA_AI`, and Neon aliases.
+
 Build the extension:
 
 ```bash
